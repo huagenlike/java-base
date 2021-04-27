@@ -16,6 +16,9 @@ import static com.mzl.java8.chap4.Dish.menu;
 public class StreamTest {
 
     public static void main(String[] args) {
+        // Java 中如何获取核心线程数？
+        System.out.println(Runtime.getRuntime().availableProcessors());
+
         List<Integer> integers = Arrays.asList(1, 5, 8, 11, 14, 16, 21, 25, 29, 31);
         List<Integer> collect = integers.stream().filter(num -> num > 28).limit(1).collect(Collectors.toList());
         System.out.println(collect);
