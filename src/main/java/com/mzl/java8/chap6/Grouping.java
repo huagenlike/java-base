@@ -1,6 +1,5 @@
 package com.mzl.java8.chap6;
 
-import javax.annotation.processing.Completion;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,12 +19,13 @@ public class Grouping {
 
         // 在分组过程中对流中的项目进行分类
         Map<CaloricLevel, List<Dish>> dishesByCaloricLevel = menu.stream().collect(Collectors.groupingBy(dish -> {
-            if (dish.getCalories() <= 400)
+            if (dish.getCalories() <= 400) {
                 return CaloricLevel.DIET;
-            else if (dish.getCalories() <= 700)
+            } else if (dish.getCalories() <= 700) {
                 return CaloricLevel.NORMAL;
-            else
+            } else {
                 return CaloricLevel.FAT;
+            }
         }));
         System.out.println(dishesByCaloricLevel);
 
@@ -33,12 +33,13 @@ public class Grouping {
         Map<Dish.Type, Map<CaloricLevel, List<Dish>>> dishesByTypeCaloricLevel = menu.stream().collect(
             Collectors.groupingBy(Dish::getType, // ←─一级分类函数
                 Collectors.groupingBy(dish -> {// ←─二级分类函数
-                    if (dish.getCalories() <= 400)
+                    if (dish.getCalories() <= 400) {
                         return CaloricLevel.DIET;
-                    else if (dish.getCalories() <= 700)
+                    } else if (dish.getCalories() <= 700) {
                         return CaloricLevel.NORMAL;
-                    else
+                    } else {
                         return CaloricLevel.FAT;
+                    }
                 } )
             )
         );
@@ -82,12 +83,13 @@ public class Grouping {
                 menu.stream().collect(
                         Collectors.groupingBy(Dish::getType, Collectors.mapping(
                                 dish -> {
-                                    if (dish.getCalories() <= 400)
+                                    if (dish.getCalories() <= 400) {
                                         return CaloricLevel.DIET;
-                                    else if (dish.getCalories() <= 700)
+                                    } else if (dish.getCalories() <= 700) {
                                         return CaloricLevel.NORMAL;
-                                    else
+                                    } else {
                                         return CaloricLevel.FAT;
+                                    }
                                 },
                                 Collectors.toSet())));
         System.out.println(caloricLevelsByType);
@@ -96,9 +98,15 @@ public class Grouping {
         Map<Dish.Type, Set<CaloricLevel>> caloricLevelsByType1 =
                 menu.stream().collect(
                         Collectors.groupingBy(Dish::getType, Collectors.mapping(
-                                dish -> { if (dish.getCalories() <= 400) return CaloricLevel.DIET;
-                                else if (dish.getCalories() <= 700) return CaloricLevel.NORMAL;
-                                else return CaloricLevel.FAT; },
+                                dish -> {
+                                    if (dish.getCalories() <= 400) {
+                                        return CaloricLevel.DIET;
+                                    } else if (dish.getCalories() <= 700) {
+                                        return CaloricLevel.NORMAL;
+                                    } else {
+                                        return CaloricLevel.FAT;
+                                    }
+                                },
                                 Collectors.toCollection(HashSet::new) ))); // 可以是你想要的Set类型
         System.out.println(caloricLevelsByType1);
     }
