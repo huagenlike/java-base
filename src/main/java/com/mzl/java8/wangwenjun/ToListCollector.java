@@ -1,4 +1,4 @@
-package com.mzl.java8.chap6;
+package com.mzl.java8.wangwenjun;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -7,12 +7,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-/**
- * @program: java-base
- * @description: 自定义Collector
- * @author: may
- * @create: 2021-05-22 19:59
- **/
+/***************************************
+ * @author:Alex Wang
+ * @Date:2016/10/30 QQ:532500648
+ * QQ交流群:286081824
+ ***************************************/
 public class ToListCollector<T> implements Collector<T, List<T>, List<T>> {
 
     private void log(final String log) {
@@ -22,7 +21,6 @@ public class ToListCollector<T> implements Collector<T, List<T>, List<T>> {
     @Override
     public Supplier<List<T>> supplier() {
         log("supplier");
-        // 方法推导
         return ArrayList::new;
     }
 
@@ -45,12 +43,13 @@ public class ToListCollector<T> implements Collector<T, List<T>, List<T>> {
     public Function<List<T>, List<T>> finisher() {
         log("finisher");
         return t -> t;
-        //return Function.identity();
     }
 
     @Override
     public Set<Characteristics> characteristics() {
         log("characteristics");
-        return Collections.unmodifiableSet(EnumSet.of(Characteristics.IDENTITY_FINISH, Characteristics.CONCURRENT));
+        return Collections.unmodifiableSet(
+                EnumSet.of(Collector.Characteristics.IDENTITY_FINISH, Characteristics.CONCURRENT
+                ));
     }
 }

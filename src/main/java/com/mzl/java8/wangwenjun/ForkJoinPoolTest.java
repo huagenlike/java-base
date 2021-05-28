@@ -1,20 +1,19 @@
-package com.mzl.java8.chap6;
+package com.mzl.java8.wangwenjun;
 
 import java.util.concurrent.ForkJoinPool;
 
-/**
- * @program: java-base
- * @description: 模拟ForkJoin
- * @author: may
- * @create: 2021-05-22 20:58
- **/
+/***************************************
+ * @author:Alex Wang
+ * @Date:2016/11/2 QQ:532500648
+ * QQ交流群:286081824
+ * 自定义stream拆分方法，了解流的并发拆分原理
+ ***************************************/
 public class ForkJoinPoolTest {
 
     private static int[] data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
     public static void main(String[] args) {
-        System.out.println("result =>" + calc());
-
+        System.out.println("result=> " + calc());
         AccumulatorRecursiveTask task = new AccumulatorRecursiveTask(0, data.length, data);
         ForkJoinPool forkJoinPool = new ForkJoinPool();
         Integer result = forkJoinPool.invoke(task);
@@ -25,6 +24,7 @@ public class ForkJoinPoolTest {
         System.out.println("AccumulatorRecursiveAction >>" + AccumulatorRecursiveAction.AccumulatorHelper.getResult());
     }
 
+
     private static int calc() {
         int result = 0;
         for (int i = 0; i < data.length; i++) {
@@ -32,4 +32,5 @@ public class ForkJoinPoolTest {
         }
         return result;
     }
+
 }
