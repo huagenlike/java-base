@@ -11,6 +11,12 @@ import static java.util.stream.Collectors.toList;
  * @author:Alex Wang
  * @Date:2016/11/8 QQ:532500648
  * QQ交流群:286081824
+ * // CompletableFuture ：实现异步编程
+ *         // supplyAsync：有返回值
+ *         // whenComplete：是执行当前任务的线程执行继续执行 whenComplete 的任务。
+ *         // whenCompleteAsync：是执行把 whenCompleteAsync 这个任务继续提交给线程池来进行执行。
+ *         // thenCompose：将在与上游任务相同的线程上调用generateRequest()(如果上游任务已经完成，则调用该线程).
+ *         // thenComposeAsync：将在提供的执行程序(如果提供)上调用generateRequest()，否则将在默认的ForkJoinPool上调用.
  ***************************************/
 public class CompletableFutureInAction {
 
@@ -41,7 +47,7 @@ public class CompletableFutureInAction {
             t.printStackTrace();
         });*/
 
-/*        long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         List<Double> doubles = Arrays.asList(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
         System.out.println(doubles);
         List<CompletableFuture<Double>> futures = doubles
@@ -58,7 +64,7 @@ public class CompletableFutureInAction {
 
         List<Double> collect = futures.stream().parallel().map(f -> f.join()).collect(toList());
         System.out.println(collect);
-        System.out.println(start-System.currentTimeMillis());*/
+        System.out.println(start-System.currentTimeMillis());
 
         /*Executor executor = Executors.newFixedThreadPool(2, r -> {
             Thread t = new Thread(r);
@@ -67,11 +73,11 @@ public class CompletableFutureInAction {
         });
         executor.execute(() -> System.out.println("sfsdfsfs"));*/
 
-        Double value = CompletableFuture.supplyAsync(CompletableFutureInAction::get)
+        /*Double value = CompletableFuture.supplyAsync(CompletableFutureInAction::get)
                 .whenComplete((v, t) -> System.out.println(">>>>" + v))
                 .thenCompose(i -> CompletableFuture.supplyAsync(() -> i + 10))
                 .get();
-        System.out.println(value);
+        System.out.println(value);*/
     }
 
     private static double get() {
