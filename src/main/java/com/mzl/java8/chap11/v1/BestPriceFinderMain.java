@@ -3,6 +3,9 @@ package com.mzl.java8.chap11.v1;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * 最佳价格查找器
+ */
 public class BestPriceFinderMain {
 
     private static BestPriceFinder bestPriceFinder = new BestPriceFinder();

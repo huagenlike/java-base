@@ -1,5 +1,9 @@
 package com.mzl.java8.chap11;
 
+/**
+ * 对商店返回字符串的解析操作封装
+ * 可以得到Quote类的一个实例，它包含了shop的名称、折扣之前的价格，以及折扣代码
+ */
 public class Quote {
 
     private final String shopName;

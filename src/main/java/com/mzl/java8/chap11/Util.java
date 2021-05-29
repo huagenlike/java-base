@@ -13,9 +13,13 @@ public class Util {
     private static final Random RANDOM = new Random(0);
     private static final DecimalFormat formatter = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US));
 
+    /**
+     * 模拟1秒钟延迟的方法
+     */
     public static void delay() {
-        int delay = 1000;
-        //int delay = 500 + RANDOM.nextInt(2000);
+//        int delay = 1000;
+        // 模拟生成0.5秒至2.5秒随机延迟的方法，用于响应CompletableFuture的completion事件
+        int delay = 500 + RANDOM.nextInt(2000);
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
