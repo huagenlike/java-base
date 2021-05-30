@@ -10,6 +10,10 @@ import java.util.stream.Collector;
 import static java.util.stream.Collector.Characteristics.CONCURRENT;
 import static java.util.stream.Collector.Characteristics.IDENTITY_FINISH;
 
+/**
+ * 自定义实现ToList方法
+ * @param <T>
+ */
 public class ToListCollector<T> implements Collector<T, List<T>, List<T>> {
 
     @Override

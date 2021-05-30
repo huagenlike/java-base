@@ -16,16 +16,20 @@ import static java.util.stream.Collector.Characteristics.IDENTITY_FINISH;
  * @description: 分区
  * @author: may
  * @create: 2021-04-28 20:30
+ * partitioningBy：分区
+ * groupingBy：分组
  **/
 public class PartitionPrimeNumbers {
     public static void main(String[] args) {
-        // 分区
+        // 根据是否素食主义分区，返回false或者true的集合
         Map<Boolean, List<Dish>> partitionedMenu = menu.stream().collect(Collectors.partitioningBy(Dish::isVegetarian)); //←─分区函数
         System.out.println(partitionedMenu);
 
+        // 获取所有素食主义者的菜
         List<Dish> vegetarianDishes = partitionedMenu.get(true);
         System.out.println(vegetarianDishes);
 
+        // 过滤查出所有素食主义的菜，放到一个集合里面
         List<Dish> vegetarianDishes1 = menu.stream().filter(Dish::isVegetarian).collect(Collectors.toList());
         System.out.println(vegetarianDishes1);
 

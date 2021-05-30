@@ -8,6 +8,9 @@ import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.*;
 import static com.mzl.java8.chap6.Dish.menu;
 
+/**
+ * 分区
+ */
 public class Partitioning {
 
     public static void main(String ... args) {
