@@ -8,6 +8,9 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 import static com.mzl.java8.chap4.Dish.menu;
 
+/**
+ * 过滤
+ */
 public class Filtering{
 
     public static void main(String...args){
@@ -40,7 +43,7 @@ public class Filtering{
         List<Dish> dishesSkip2 =
             menu.stream()
                 .filter(d -> d.getCalories() > 300)
-                .skip(2)
+                .skip(2) // 跳过前两个元素，个数大于实际个数不会报错
                 .collect(toList());
 
         dishesSkip2.forEach(System.out::println);

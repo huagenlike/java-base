@@ -70,6 +70,12 @@ public class FilteringApples{
         return apple.getWeight() > 150;
     }
 
+    /**
+     * 使用谓词，将方法当做参数传递（返回true 或 false）
+     * @param inventory
+     * @param p
+     * @return
+     */
     public static List<Apple> filterApples(List<Apple> inventory, Predicate<Apple> p){
         List<Apple> result = new ArrayList<>();
         for(Apple apple : inventory){
