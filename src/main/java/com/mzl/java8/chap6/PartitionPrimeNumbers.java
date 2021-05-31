@@ -37,14 +37,16 @@ public class PartitionPrimeNumbers {
         Map<Boolean, Map<Dish.Type, List<Dish>>> vegetarianDishesByType =
                 menu.stream().collect(
                         Collectors.partitioningBy(Dish::isVegetarian, // ←─分区函数
-                                Collectors.groupingBy(Dish::getType))); // ←─第二个收集器
+                                Collectors.groupingBy(Dish::getType))); // ←─第二个收集器，分组
         System.out.println(vegetarianDishesByType);
 
         // 素食和非素食中热量最高的菜
         Map<Boolean, Dish> mostCaloricPartitionedByVegetarian =
                 menu.stream().collect(
                         Collectors.partitioningBy(Dish::isVegetarian,
+                                // collectingAndThen：先进行结果集的收集，然后将收集到的结果集进行下一步的处理
                                 Collectors.collectingAndThen(
+                                        // 查询出热量最高的菜
                                         Collectors.maxBy(Comparator.comparingInt(Dish::getCalories)),
                                         Optional::get)));
         System.out.println(mostCaloricPartitionedByVegetarian);
@@ -74,7 +76,7 @@ public class PartitionPrimeNumbers {
         System.out.println(disheSet);
 
         // 把流中所有项目收集到给定的供应源创建的集合
-        List<String> list = Arrays.asList("java", "python", "C++","php","java");
+        List<String> list = Arrays.asList("java", "python", "C++", "php", "java");
         //用LinkedList收集
         List<String> linkedListResult = list.stream().collect(Collectors.toCollection(LinkedList::new));
         System.out.println(linkedListResult);
@@ -118,11 +120,11 @@ public class PartitionPrimeNumbers {
         System.out.println(howManyDishes1);
 
         // 根据项目的一个属性的值对流中的项目作问组，并将属性值作为结果`Map`的键
-        Map<Dish.Type,List<Dish>> dishesByType = menu.stream().collect(Collectors.groupingBy(Dish::getType));
+        Map<Dish.Type, List<Dish>> dishesByType = menu.stream().collect(Collectors.groupingBy(Dish::getType));
         System.out.println(dishesByType);
 
         // 根据对流中每个项目应用谓词的结果来对项目进行分区
-        Map<Boolean,List<Dish>> vegetarianDishes2 = menu.stream().collect(Collectors.partitioningBy(Dish::isVegetarian));
+        Map<Boolean, List<Dish>> vegetarianDishes2 = menu.stream().collect(Collectors.partitioningBy(Dish::isVegetarian));
         System.out.println(vegetarianDishes2);
     }
 
@@ -158,9 +160,7 @@ public class PartitionPrimeNumbers {
     }
 
 
-
-    public static class PrimeNumbersCollector
-            implements Collector<Integer, Map<Boolean, List<Integer>>, Map<Boolean, List<Integer>>> {
+    public static class PrimeNumbersCollector implements Collector<Integer, Map<Boolean, List<Integer>>, Map<Boolean, List<Integer>>> {
 
         @Override
         public Supplier<Map<Boolean, List<Integer>>> supplier() {
@@ -173,8 +173,8 @@ public class PartitionPrimeNumbers {
         @Override
         public BiConsumer<Map<Boolean, List<Integer>>, Integer> accumulator() {
             return (Map<Boolean, List<Integer>> acc, Integer candidate) -> {
-                acc.get( isPrime( acc.get(true),
-                        candidate) )
+                acc.get(isPrime(acc.get(true),
+                        candidate))
                         .add(candidate);
             };
         }
@@ -207,7 +207,7 @@ public class PartitionPrimeNumbers {
                             put(false, new ArrayList<Integer>());
                         }},
                         (acc, candidate) -> {
-                            acc.get( isPrime(acc.get(true), candidate) )
+                            acc.get(isPrime(acc.get(true), candidate))
                                     .add(candidate);
                         },
                         (map1, map2) -> {

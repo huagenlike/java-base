@@ -17,6 +17,9 @@ public class WordCount {
         System.out.println("Found " + countWords(SENTENCE) + " words");
     }
 
+    /**
+     * 迭代计算单词
+     */
     public static int countWordsIteratively(String s) {
         int counter = 0;
         boolean lastSpace = true;

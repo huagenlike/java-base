@@ -16,6 +16,9 @@ public class ParallelStreamBenchmark {
 
     private static final long N = 10_000_000L;
 
+    /**
+     * 迭代求和
+     */
     @Benchmark
     public long iterativeSum() {
         long result = 0;

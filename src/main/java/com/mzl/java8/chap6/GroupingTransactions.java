@@ -95,8 +95,9 @@ public class GroupingTransactions {
 
         // 你可以使用下面这样单参数形式的reducing来找到热量最高的菜
         Optional<Dish> mostCalorieDish = menu.stream().collect(Collectors.reducing((d1, d2) -> d1.getCalories() > d2.getCalories() ? d1 : d2));
+        System.out.println(mostCalorieDish.get());
 
-        // 你可以像下面这样使用reduce方法来实现toListCollector所做的工作
+        // 你可以像下面这样使用reduce方法来实现toList Collector所做的工作
         Stream<Integer> stream = Arrays.asList(1, 2, 3, 4, 5, 6).stream();
         List<Integer> numbers = stream.reduce(new ArrayList<Integer>(),(List<Integer> l, Integer e) -> {
             l.add(e);
