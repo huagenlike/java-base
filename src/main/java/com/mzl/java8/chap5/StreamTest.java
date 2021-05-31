@@ -27,17 +27,20 @@ public class StreamTest {
         List<Integer> collect2 = integers.stream().filter(num -> num > 28).limit(1).skip(2).collect(Collectors.toList());
         System.out.println(collect2);
 
-        List<String> strList = Arrays.asList("lihuagen", "zhangsan", "heihei");
-
         List<Integer> disNameLengths = menu.stream().map(Dish::getName).map(String::length).collect(Collectors.toList());
         System.out.println(disNameLengths);
         List<String> collect3 = menu.stream().map(Dish::getName).collect(Collectors.toList());
         System.out.println(collect3);
-        List<Integer> collect4 = menu.stream().map(Dish::getName).map(String::length).collect(Collectors.toList());
-        System.out.println(collect4);
 
         List<String> words = Arrays.asList("Java 8", "Lambdas", "In", "Action");
         List<String[]> collect5 = words.stream().map(world -> world.split("")).distinct().collect(Collectors.toList());
         System.out.println(collect5);
+
+        words = Arrays.asList("Java 8", "Lambdas", "In", "In", "Action");
+        collect5 = words.stream().map(world -> world.split("")).distinct().collect(Collectors.toList());
+        System.out.println(collect5);
+
+        List<Object> collect4 = words.stream().flatMap(world -> Arrays.stream(world.split(""))).distinct().collect(Collectors.toList());
+        System.out.println(collect4);
     }
 }
