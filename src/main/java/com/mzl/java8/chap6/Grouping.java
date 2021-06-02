@@ -109,6 +109,10 @@ public class Grouping {
                                 },
                                 Collectors.toCollection(HashSet::new) ))); // 可以是你想要的Set类型
         System.out.println(caloricLevelsByType1);
+
+        // 转类型后排序
+        menu.stream().sorted(Comparator.comparing(u -> Integer.valueOf(u.getName()))).collect(Collectors.toList());
+
     }
 
     /**
