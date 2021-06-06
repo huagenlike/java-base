@@ -38,7 +38,7 @@ public class ThreadTest {
     }
 
     public static void main(String[] args) {
-        // 方式一，无返回值
+        // 方式一，继承Thread类创建线程，无返回值
         // 创建线程
         MyThread thread = new MyThread();
         // 启动线程
@@ -46,7 +46,7 @@ public class ThreadTest {
 
         System.out.println("------------------");
 
-        // 方式二，无返回值
+        // 方式二，实现Runnable接口创建线程，无返回值
         RunnableTask task = new RunnableTask();
         // 两个线程可以共用task代码逻辑
         new Thread(task).start();
@@ -54,7 +54,7 @@ public class ThreadTest {
 
         System.out.println("------------------");
 
-        // 方式三，有返回值
+        // 方式三，使用Callable和Future创建线程，有返回值
         // 创建异步任务
         FutureTask<String> futureTask = new FutureTask<>(new CallerTask());
         // 启动线程
