@@ -2,6 +2,7 @@ package com.mzl.java8.chap5;
 
 import com.mzl.java8.chap4.Dish;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ public class StreamTest {
 
     public static void main(String[] args) {
         // Java 中如何获取核心线程数？
-        System.out.println(Runtime.getRuntime().availableProcessors());
+       /* System.out.println(Runtime.getRuntime().availableProcessors());
 
         List<Integer> integers = Arrays.asList(1, 5, 8, 11, 14, 16, 21, 25, 29, 31);
         List<Integer> collect = integers.stream().filter(num -> num > 28).limit(1).collect(Collectors.toList());
@@ -41,6 +42,29 @@ public class StreamTest {
         System.out.println(collect5);
 
         List<Object> collect4 = words.stream().flatMap(world -> Arrays.stream(world.split(""))).distinct().collect(Collectors.toList());
-        System.out.println(collect4);
+        System.out.println(collect4);*/
+
+        List<List<String>> aa = new ArrayList<>();
+        List<String> a = new ArrayList<>();
+        a.add("a");
+        a.add("b");
+        a.add("c");
+
+        List<String> b = new ArrayList<>();
+        b.add("1");
+        b.add("2");
+        b.add("3");
+
+        List<String> c = new ArrayList<>();
+        c.add("11");
+        c.add("22");
+        c.add("33");
+
+        aa.add(a);
+        aa.add(b);
+        aa.add(c);
+
+        List<List<String>> collect = aa.stream().skip(1).collect(Collectors.toList());
+        System.out.println(collect);
     }
 }
