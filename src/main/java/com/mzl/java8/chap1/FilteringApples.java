@@ -9,7 +9,7 @@ import java.util.function.Predicate;
  * @author may
  * @version 1.0
  * @className: FilteringApples
- * @description: TODO
+ * @description: 使用谓词，lambda传递方法
  * @date 2021/4/23 13:48
  */
 public class FilteringApples{
