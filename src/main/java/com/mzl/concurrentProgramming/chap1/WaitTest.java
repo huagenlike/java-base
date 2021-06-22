@@ -21,6 +21,8 @@ public class WaitTest {
 
     public static void main(String[] args) throws InterruptedException {
         Thread threadA = new Thread(() -> {
+            // wait()方法没有获取到监视器锁，则会抛出 IllegalMonitorStateException 异常
+            // resourceA.wait();
             try {
                 // 获取resourceA共享资源的监视器锁
                 synchronized (resourceA) {
@@ -40,7 +42,7 @@ public class WaitTest {
 
         Thread threadB = new Thread(() -> {
             try {
-                Thread.sleep(1000l);
+                Thread.sleep(1000L);
                 // 获取resourceA共享资源的监视器锁
                 synchronized (resourceA) {
                     System.out.println("threadB get resourceA lock");
@@ -60,6 +62,7 @@ public class WaitTest {
         threadA.start();
         threadB.start();
 
+        // join 就是主线程执行到这，需要等threadA执行完毕后才会继续往下执行
         threadA.join();
         threadB.join();
 

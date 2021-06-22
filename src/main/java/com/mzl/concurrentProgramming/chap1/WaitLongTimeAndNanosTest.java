@@ -5,34 +5,30 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * @program: java-base
- * @description:
- * @author: may
- * @create: 2021-06-05 21:33
- **/
-public class WaitLongTimeTest {
-
+ * @author lihuagen
+ * @version 1.0
+ * @className: WaitLongTimeAndNanosTest
+ * @description: TODO
+ * @date 2021/6/20 11:01
+ * public final void wait(long timeout, int nanos)
+ *  timeout - 等待时间（以毫秒为单位）。
+ *  nanos - 额外等待时间（以纳秒为单位）。
+ */
+public class WaitLongTimeAndNanosTest {
     private List synchedList;
 
-    public WaitLongTimeTest() {
-        // 创建一个同步列表
+    public WaitLongTimeAndNanosTest() {
+        // 创建线程安全的linkedList
         synchedList = Collections.synchronizedList(new LinkedList<>());
     }
 
-    /**
-     * @description: 删除列表中的元素
-     * @param null
-     * @return:
-     * @author: lihuagen
-     * @time: 2021/6/17 18:18
-     */
+    // 删除列表中的元素
     public String removeElement() throws InterruptedException {
         synchronized (synchedList) {
-            // 列表为空就等待
+            // 列表为空就等待，等待  5 秒加上 500 纳秒
             while (synchedList.isEmpty()) {
                 System.out.println("List is empty...");
-                // 设置等待时间
-                synchedList.wait(10000);
+                synchedList.wait(5000, 500);
                 System.out.println("Waiting...");
             }
             String element = (String) synchedList.remove(0);
@@ -40,13 +36,7 @@ public class WaitLongTimeTest {
         }
     }
 
-    /**
-     * @description: 添加元素到列表
-     * @param element 被添加的元素
-     * @return:
-     * @author: lihuagen
-     * @time: 2021/6/17 18:19
-     */
+    // 添加元素到列表
     public void addElement(String element) {
         System.out.println("Opening...");
         synchronized (synchedList) {
@@ -60,44 +50,42 @@ public class WaitLongTimeTest {
     }
 
     public static void main(String[] args) {
-        final WaitLongTimeTest demo = new WaitLongTimeTest();
-        Thread runA = new Thread(() -> {
+        final WaitLongTimeAndNanosTest demo = new WaitLongTimeAndNanosTest();
+        Runnable runnableA = () -> {
             try {
                 String item = demo.removeElement();
                 System.out.println("" + item);
-            } catch (InterruptedException ix) {
+            } catch (InterruptedException e) {
                 System.out.println("Interrupted Exception!");
-            } catch (Exception x) {
+            } catch (Exception e) {
                 System.out.println("Exception thrown.");
             }
-        });
+        };
 
-        Thread runB = new Thread(
-            // 执行添加元素操作，并开始循环
-            () -> demo.addElement("Hello!")
-        );
+        Runnable runnableB = () -> {
+            demo.addElement("Hello!");
+        };
 
         try {
-            Thread threadA1 = new Thread(runA, "Baidu");
+            Thread threadA1 = new Thread(runnableA, "Google");
             threadA1.start();
 
             Thread.sleep(500);
 
-            Thread threadA2 = new Thread(runA, "Mybj");
+            Thread threadA2 = new Thread(runnableA, "Runoob");
             threadA2.start();
 
             Thread.sleep(500);
 
-            Thread threadB = new Thread(runB, "Taobao");
+            Thread threadB = new Thread(runnableB, "Taobao");
             threadB.start();
 
             Thread.sleep(1000);
 
-            // 当一个线程调用共享对象的wait()方法被阻塞挂起后，如果其他线程中断了该线程，则该线程就会抛出 InterruptedException 异常，并返回
             threadA1.interrupt();
             threadA2.interrupt();
         } catch (InterruptedException x) {
-
         }
+
     }
 }

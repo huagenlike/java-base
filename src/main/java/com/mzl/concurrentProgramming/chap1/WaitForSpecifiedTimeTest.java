@@ -54,8 +54,27 @@ public class WaitForSpecifiedTimeTest {
 
     public static void main(String []args)
     {
-        WaitForSpecifiedTimeTest test = new WaitForSpecifiedTimeTest();
-        test.startAnotherThread();
-        test.sleepFor(3000);
+//        WaitForSpecifiedTimeTest test = new WaitForSpecifiedTimeTest();
+//        test.startAnotherThread();
+//        test.sleepFor(3000);
+
+        Object obj = new Object(); // 创建唯一的锁对象
+        new Thread() { // 匿名内部类创建多线程
+            @Override
+            public void run() {
+                while (true) { // 无限次执行
+                    synchronized (obj) { // 同步代码块
+                        System.out.println("上阙：我且徐行，无规缚，倦即停。");
+                        try {
+                            // 超时自动苏醒并进入到运行状态或阻塞状态
+                            obj.wait(3000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        System.out.println("下阙：听风闻雨，无所欲，步自轻。\n");
+                    }
+                }
+            }
+        }.start();
     }
 }
