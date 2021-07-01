@@ -10,6 +10,9 @@ package com.mzl.concurrentProgramming.chap1;
  * 只要任何非守护线程还在运行，守护线程就不会终止。
  **/
 public class DaemonThreadTest {
+    // 正确的线程中止 - 标志位
+    public volatile static boolean flag = true;
+
     public static void main(String[] args) {
         Thread thread1 = new Thread(() -> {
             while (true) {
@@ -27,12 +30,13 @@ public class DaemonThreadTest {
         thread1.start();
 
         Thread thread2 = new Thread(() -> {
-            while (true) {
+            while (flag) {
                 try {
                     Thread currentthread2 = Thread.currentThread();
                     System.out.println("用户线程" + currentthread2.getName() + "心跳一次");
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
+                    System.out.println("thread2终止");
                     e.printStackTrace();
                 }
             }
@@ -42,6 +46,10 @@ public class DaemonThreadTest {
             Thread.sleep(10000);
             Thread currentthread = Thread.currentThread();
             System.out.println("主线程" + currentthread.getName() + "退出！");
+            Thread.sleep(5000);
+            // 中断会抛出 InterruptedException 异常，
+            // thread2.interrupt();
+            flag = false;
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

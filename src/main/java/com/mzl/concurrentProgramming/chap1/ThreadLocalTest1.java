@@ -5,6 +5,7 @@ package com.mzl.concurrentProgramming.chap1;
  * @description: ThreadLocal 不支持继承性
  * @author: may
  * @create: 2021-06-07 22:30
+ * 同一个ThreadLocal变量在父线程中被设置值后，在子线程中是获取不到的。（threadLocals中为当前调用线程对应的本地变量，所以二者自然是不能共享的）
  **/
 public class ThreadLocalTest1 {
     // 1.创建线程变量

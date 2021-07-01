@@ -12,9 +12,15 @@ package com.mzl.concurrentProgramming.chap1;
 public class InterruptedAndIsInterruptedDifferentChange {
     public static void main(String[] args) throws InterruptedException {
         Thread threadOne = new Thread(() -> {
+            System.out.println(Thread.currentThread().interrupted());
             // 中断标志为true时会退出循环，并且清除中断标志
             while (!Thread.currentThread().interrupted()) {
-
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("....");
             }
             System.out.println("threadOne isInterrupted:" + Thread.currentThread().isInterrupted());
         });
@@ -23,6 +29,7 @@ public class InterruptedAndIsInterruptedDifferentChange {
         threadOne.start();
 
         // 设置中断标志
+        // 调用interrupted()方法后中断标志被清除了
         threadOne.interrupt();
 
         threadOne.join();

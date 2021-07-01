@@ -32,7 +32,10 @@ public class JoinInterruptTest {
 
         threadOne.start();
         threadTwo.start();
+        // interrupt是中断处于阻塞/睡眠状态的线程，需要注意的是这里的中断并不是让线程死亡， 而是退出阻塞状态继续运行，所以interrupt不能中断运行中的线程
+        // threadOne.interrupt();
 
+        // 从运行结果可以发现，即使主线程中断了，子线程一样会继续运行自己的代码逻辑
         try {
             // 主线程调用threadOne的join方法阻塞自己等待线程threadOne执行完毕
             threadOne.join();

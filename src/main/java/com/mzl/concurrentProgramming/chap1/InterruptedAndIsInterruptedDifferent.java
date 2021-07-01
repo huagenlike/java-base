@@ -30,7 +30,7 @@ public class InterruptedAndIsInterruptedDifferent {
         System.out.println("isInterrupted:" + threadOne.isInterrupted());
 
         // 获取中断标志并重置
-        // 这里虽然调用了threadOne的interrupted()方法，但是获取的是主线程的中断标志，因为主线程是当前线程。
+        // interrupted()方法内部是获取当前线程的中断状态，这里虽然调用了threadOne的interrupted()方法，但是获取的是主线程的中断标志，因为主线程是当前线程。
         System.out.println("isInterrupted:" + threadOne.interrupted());
 
         // 获取中断标志并重置

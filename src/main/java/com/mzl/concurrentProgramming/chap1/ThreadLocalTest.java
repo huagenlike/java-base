@@ -6,6 +6,8 @@ package com.mzl.concurrentProgramming.chap1;
  * @author: may
  * @create: 2021-06-06 19:51
  * ThreadLocal是JDK包提供的，它提供线程本地变量，如果创建一乐ThreadLocal变量，那么访问这个变量的每个线程都会有这个变量的一个副本，在实际多线程操作的时候，操作的是自己本地内存中的变量，从而规避了线程安全问题
+ * Thread类中有两个变量threadLocals和inheritableThreadLocals，二者都是ThreadLocal内部类ThreadLocalMap类型的变量，我们通过查看内部内ThreadLocalMap可以发现实际上它类似于一个HashMap。
+ * 在默认情况下，每个线程中的这两个变量都为null，只有当线程第一次调用ThreadLocal的set或者get方法的时候才会创建他们（后面我们会查看这两个方法的源码）。
  **/
 public class ThreadLocalTest {
     // （1）print函数
@@ -13,7 +15,7 @@ public class ThreadLocalTest {
         // 1.1 打印当前线程本地内存中localVariable
         System.out.println(str + ":" + localVariable.get());
         // 1.2 清除当前线程本地内存中的localVariable变量
-        // localVariable.remove();
+         localVariable.remove();
     }
 
     // （2）创建ThreadLocal变量

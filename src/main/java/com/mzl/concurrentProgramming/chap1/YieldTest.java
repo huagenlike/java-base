@@ -15,6 +15,7 @@ public class YieldTest implements Runnable {
         t.start();
     }
 
+    @Override
     public void run() {
         for (int i = 0; i < 5; i++) {
             // 当i=0时，让出cpu执行权，放弃时间片，进行下一轮调度

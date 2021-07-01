@@ -60,17 +60,35 @@ public class NotifyTest {
             }
         });
 
+        Thread threadD = new Thread(() -> {
+            synchronized (resourceA) {
+                System.out.println("threadD get resourceA lock");
+                try {
+                    System.out.println("threadD begin wait");
+                    resourceA.wait();
+                    System.out.println("threadD end wait");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         // 启动线程
         threadA.start();
         threadB.start();
         // 这里启动线程C前首先调用sleep方法让主线程休眠1s，这样做的目的是让线程A和线程B全部执行到调用wait方法后再调用线程C的notify方法。
         Thread.sleep(1000L);
         threadC.start();
+        Thread.sleep(1000L);
+        // notifyAll()方法只会唤醒调用这个方法前调用了wait系列函数而被放入共享变量等待集合里面的线程
+        // 所以这个线程会一直等待
+        threadD.start();
 
         // 等待线程结束
         threadA.join();
         threadB.join();
         threadC.join();
+        threadD.join();
 
         System.out.println("main over");
     }

@@ -1,0 +1,83 @@
+package com.mzl.concurrentProgramming;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicStampedReference;
+
+/**
+ * @author lihuagen
+ * @version 1.0
+ * @className: CASABA
+ * @description: CAS ABA问题
+ * @date 2021/6/23 10:13
+ */
+public class CASABA {
+    // 普通的原子类，存在ABA问题
+    AtomicInteger a1 = new AtomicInteger(10);
+    // 带有时间戳的原子类，不存在ABA问题，第二个参数就是默认时间戳，这里指定为0
+    AtomicStampedReference<Integer> a2 = new AtomicStampedReference<Integer>(10, 0);
+
+    public static void main(String[] args) {
+        CASABA a = new CASABA();
+        a.test();
+    }
+
+    public void test() {
+        new Thread1().start();
+        new Thread2().start();
+        new Thread3().start();
+        new Thread4().start();
+    }
+
+    // 模拟ABA操作
+    class Thread1 extends Thread {
+        @Override
+        public void run() {
+            // 会比较预期值是否当前值，如果不是，不执行操作
+            a1.compareAndSet(11, 10);
+            a1.compareAndSet(10, 11);
+            a1.compareAndSet(11, 10);
+        }
+    }
+
+    class Thread2 extends Thread {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(200);  // 睡0.2秒，给线程1时间做ABA操作
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("AtomicInteger原子操作：" + a1.compareAndSet(10, 11));
+        }
+    }
+
+    class Thread3 extends Thread {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(500);  // 睡0.5秒，保证线程4先执行
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            int stamp = a2.getStamp();
+            a2.compareAndSet(10, 11, stamp, stamp + 1);
+            stamp = a2.getStamp();
+            a2.compareAndSet(11, 10, stamp, stamp + 1);
+        }
+    }
+
+    // 可以看到使用AtomicStampedReference进行compareAndSet的时候，除了要验证数据，还要验证时间戳。
+    // 如果数据一样，但是时间戳不一样，那么这个数据其实也被修改过了。
+    class Thread4 extends Thread {
+        @Override
+        public void run() {
+            int stamp = a2.getStamp();
+            try {
+                Thread.sleep(1000);  // 睡一秒，给线程3时间做ABA操作
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("AtomicStampedReference原子操作:" + a2.compareAndSet(10, 11, stamp, stamp + 1));
+        }
+    }
+}
