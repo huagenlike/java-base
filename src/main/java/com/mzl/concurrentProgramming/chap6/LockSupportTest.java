@@ -1,5 +1,6 @@
 package com.mzl.concurrentProgramming.chap6;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -28,7 +29,9 @@ public class LockSupportTest {
 //        unparkTest();
 //        lockSupportTest();
 //        lockSupportTest1();
-        parkNanosTest();
+//        parkNanosTest();
+//        parkUntilTest();
+        parkUntilTest1();
     }
 
     // 如果调用park()方法的线程已经拿到了与 LockSupport 关联的许可证，则 调用LockSupport.park() 时会马上返回，否则调用线程会被禁止参与线程的调度，也就是会被阻塞挂起。
@@ -103,6 +106,32 @@ public class LockSupportTest {
 
         // 线程挂起10秒,参数单位是纳秒
         LockSupport.parkNanos(1000 * 1000 * 1000 * 10L);
+
+        System.out.println("end park!");
+    }
+
+    // parkUntil(long deadline)
+    // 同park()方法，deadline参数表示最长阻塞到某一个时间点，当到达这个时间点，park方法将自动返回。（该时间为从1970年到现在某一个时间点的毫秒数）
+    private static void parkUntilTest() {
+        System.out.println("begin park");
+
+        // 最长阻塞到当前时间的5秒后
+        long startTime = System.currentTimeMillis();
+        LockSupport.parkUntil(startTime + 1000 * 5);
+
+        System.out.println("end park!");
+    }
+
+    // parkUntil(Object blocker, long deadline)
+    // 同parkUntil(long deadline)方法，多了一个阻塞对象blocker参数。
+    // 和parkNanos(Object blocker, long nanos) 方法的区别是，后者是从当前算等待 nanos秒时间，
+    // 而前者是指定一个时间点，比如需要等到2017.12.11日12：00：00，则把这个时间点转换为从1970年到这个时间点的总毫秒数
+    private static void parkUntilTest1() {
+        System.out.println("begin park");
+
+        Thread thread = Thread.currentThread();
+        long l = System.currentTimeMillis();
+        LockSupport.parkUntil(thread, l + 1000 * 5);
 
         System.out.println("end park!");
     }
