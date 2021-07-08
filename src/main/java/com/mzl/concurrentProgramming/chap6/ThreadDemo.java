@@ -1,10 +1,10 @@
-package com.mzl.concurrentProgramming;
+package com.mzl.concurrentProgramming.chap6;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
-import static com.mzl.concurrentProgramming.ReentrantLockInterruptTest.lock1;
-import static com.mzl.concurrentProgramming.ReentrantLockInterruptTest.lock2;
+import static com.mzl.concurrentProgramming.chap6.ReentrantLockInterruptTest.lock1;
+import static com.mzl.concurrentProgramming.chap6.ReentrantLockInterruptTest.lock2;
 
 /**
  * @author lihuagen

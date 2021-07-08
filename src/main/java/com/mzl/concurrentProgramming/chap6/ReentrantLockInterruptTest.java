@@ -1,4 +1,4 @@
-package com.mzl.concurrentProgramming;
+package com.mzl.concurrentProgramming.chap6;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
