@@ -1,56 +1,53 @@
 package com.mzl.concurrentProgramming.chap6;
 
 import java.util.ArrayList;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author lihuagen
  * @version 1.0
- * @className: ReentrantLockListTest
- * @description: 使用 ReentrantLockList 来实现一个简单的线程安全的List
- * @date 2021/7/8 10:49
- * 假如线程 Thread1、Thread2和Thread3同时尝试获取独占锁ReentrantLock,假设Thread1获取到了,则Thread2和Thread3就会被转换为Node节点并被放入ReentrantLock对应的AQS阻塞队列,而后被阻塞挂起,
- * 假设Thread1获取锁后调用了对应的锁创建的条件变量1,那么Thread1就会释放获取到的锁,然后当前线程就会被转换为Node节点插入条件变量1的条件队列。
- * 由于 Thread1释放了锁,所以阻塞到AQS队列里面的Thread2和Thread3就有机会获取到该锁,假如使用的是公平策略,那么这时候 Thread2会获取到该锁,从而从AQS队列里面移除Thread2对应的Node节点。
+ * @className: ReentrantReadWriteLockTest
+ * @description: 读写锁
+ * @date 2021/7/9 15:37
+ * (实例类：ReentrantLockListTest)上节介绍了如何使用 ReentrantLock 实现线程安全的 list ，但是由于 ReentrantLock是独占锁，所以在读多写少的情况下性能很差。下面使用 ReentrantReadWri teLock 来改造它，代码如下。
  */
-public class ReentrantLockListTest {
-
-    // 线程不安全的List
+public class ReentrantReadWriteLockTest {
+    // 线程不安全的list
     private ArrayList<String> array = new ArrayList<>();
     // 独占锁
-    private volatile ReentrantLock lock = new ReentrantLock();
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final Lock readLock = lock.readLock();
+    private final Lock writeLock = lock.writeLock();
 
     // 添加元素
     public void add(String e) {
-        System.out.println("thread name is " + Thread.currentThread().getName());
-        lock.lock();
+        writeLock.lock();
         try {
             Thread.sleep(1000L);
             array.add(e);
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
-            lock.unlock();
+            writeLock.unlock();
         }
     }
 
     // 删除元素
     public void remove(String e) {
-        System.out.println("thread name is " + Thread.currentThread().getName());
-        lock.lock();
+        writeLock.lock();
         try {
             array.remove(e);
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
-            lock.unlock();
+            writeLock.unlock();
         }
     }
 
     // 获取数据
     public String get(int index) {
-        System.out.println("thread name is " + Thread.currentThread().getName());
-        lock.lock();
+        readLock.lock();
         try {
             Thread.sleep(1000L);
             return array.get(index);
@@ -58,15 +55,15 @@ public class ReentrantLockListTest {
             ex.printStackTrace();
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + array.size());
         } finally {
-            lock.unlock();
+            readLock.unlock();
         }
     }
 
-    // 执行完耗时【15193】：
-    // 因为ReentrantLock同步方式是独占式，不管是获取还是新增、修改都是排他的，所以不能同时进行，耗时久
+    // 执行完耗时【6088】：
+    // 因为ReentrantReadWriteLock 中readLock是共享锁，writeLock是排他锁，所以主要耗时在写入（add()）方法
     public static void main(String[] args) throws InterruptedException {
         long startTime = System.currentTimeMillis();
-        ReentrantLockListTest test = new ReentrantLockListTest();
+        ReentrantReadWriteLockTest test = new ReentrantReadWriteLockTest();
         Thread threadOne = new Thread(() -> {
             System.out.println("begin threadOne");
             test.add("One");
@@ -139,5 +136,4 @@ public class ReentrantLockListTest {
         System.out.println(test.array);
         System.out.println(System.currentTimeMillis() - startTime);
     }
-
 }
