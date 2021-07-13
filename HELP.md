@@ -71,7 +71,7 @@
         实现了原子性操作
         锁升级：偏向锁，自旋锁（默认自选10次），重量级锁
     volatile（保证了可见性和有序性）
-        当一个变量被声明为volatile时，线程再写入变量时不会吧值缓存在寄存器或者其他地方，而是会把值刷新会主内存。其他线程读取该共享变量时，会从主内存重新获取最新值。
+        当一个变量被声明为volatile时，线程再写入变量时不会把值缓存在寄存器或者其他地方，而是会把值刷新会主内存。其他线程读取该共享变量时，会从主内存重新获取最新值。
         禁止进行指令重排序。（实现有序性）
         只能保证对单次读/写的原子性。i++ 这种操作不能保证原子性。
         虽然提供了可见性保证，但并不保证操作的原子性。
@@ -214,11 +214,186 @@
             当前锁处于读锁模式， 并且没有其他线程是读锁模式。
             当前处于乐观读模式，井且当前写锁可用。
         Stampedlock提供的读写锁与 Reentrantread Writelock类似,只是前者提供的是不可重入锁。但是前者通过提供乐观读锁在多线程多读的情况下提供了更好的性能,这是因为获取乐观读锁时不需要进行CAS操作设置锁的状态,而只是简单地测试状态。
-# 第7章 Java并发包中并发队列原理剖析
-    ConcurrentLinkedQueue 原理探究
-        是一个基于链接节点的无界线程安全队列，它采用先进先出的规则对节点进行排序，当我们添加一个元素的时候，它会添加到队列的尾部，当我们获取一个元素时，它会返回队列头部的元素。
-        其底层数据结构使用单向链表实现，对于入队和出队操作使用 CAS 来实现线程安全。
-        它采用了“wait－free”算法来实现，该算法在Michael & Scott算法上进行了一些修改。
+# 第7章 Java并发包中并发队列原理剖析【未细看】
+    ConcurrentlinkedQueue 原理探究
+        一个基于链接节点的无界线程安全队列。此队列按照 FIFO（先进先出）原则对元素进行排序。队列的头部 是队列中时间最长的元素。队列的尾部 是队列中时间最短的元素。
+        新的元素插入到队列的尾部，队列获取操作从队列头部获得元素。当多个线程共享访问一个公共 collection 时，ConcurrentLinkedQueue 是一个恰当的选择。此队列不允许使用 null 元素。
+    LinkedBlockingQueue 原理探究
+        LinkedBlockingQueue不同于ArrayBlockingQueue，它如果不指定容量，默认为Integer.MAX_VALUE，也就是无界队列。所以为了避免队列过大造成机器负载或者内存爆满的情况出现，我们在使用的时候建议手动传一个队列的大小。
+        是一个阻塞队列，内部由两个ReentrantLock来实现出入队列的线程安全，由各自的Condition对象的await和signal来实现等待和唤醒功能。它和ArrayBlockingQueue的不同点在于：
+            队列大小有所不同，ArrayBlockingQueue是有界的初始化必须指定大小，而LinkedBlockingQueue可以是有界的也可以是无界的(Integer.MAX_VALUE)，对于后者而言，当添加速度大于移除速度时，在无界的情况下，可能会造成内存溢出等问题。
+            数据存储容器不同，ArrayBlockingQueue采用的是数组作为数据存储容器，而LinkedBlockingQueue采用的则是以Node节点作为连接对象的链表。
+            由于ArrayBlockingQueue采用的是数组的存储容器，因此在插入或删除元素时不会产生或销毁任何额外的对象实例，而LinkedBlockingQueue则会生成一个额外的Node对象。这可能在长时间内需要高效并发地处理大批量数据的时，对于GC可能存在较大影响。
+            两者的实现队列添加或移除的锁不一样，ArrayBlockingQueue实现的队列中的锁是没有分离的，即添加操作和移除操作采用的同一个ReenterLock锁，而LinkedBlockingQueue实现的队列中的锁是分离的，其添加采用的是putLock，移除采用的则是takeLock，这样能大大提高队列的吞吐量，也意味着在高并发的情况下生产者和消费者可以并行地操作队列中的数据，以此来提高整个队列的并发性能。
+    ArrayBlockingQueue 原理探究
+        基于数组的阻塞队列。数组是要指定长度的，所以使用ArrayBlockingQueue时必须指定长度，也就是它是一个有界队列。
+        它实现了BlockingQueue接口，有着队列、集合以及阻塞队列的所有方法。
+        使得在入队的时候可以在O(1)的时间内完成；但是对于出队操作，在删除队头元素之后，必须将数组中的所有元素都往前移动一个位置，这个操作的复杂度达到了O(n)，效果并不是很好。
+        为了解决这个问题，我们可以使用另外一种逻辑结构来处理数组中各个位置之间的关系。假设现在我们有一个数组A[1…n]，我们可以把它想象成一个环型结构，即A[n]之后是A[1]，相信了解过一致性Hash算法的童鞋应该很容易能够理解。如下图所示：我们可以使用两个指针，分别维护队头和队尾两个位置，使入队和出队操作都可以在O(1)的时间内完成。
+    PriorityBlockingQueue 原理探究
+        是一个支持优先级的无界阻塞队列，直到系统资源耗尽。
+# 第8章 Java并发包中线程池ThreadPoolExecutor原理探究
+    runStateOf(int c)  方法：c & 高3位为1，低29位为0的~CAPACITY，用于获取高3位保存的线程池状态
+    workerCountOf(int c)方法：c & 高3位为0，低29位为1的CAPACITY，用于获取低29位的线程数量
+    ctlOf(int rs, int wc)方法：参数rs表示runState，参数wc表示workerCount，即根据runState和workerCount打包合并成ctl
+    其中Worker继承AQS和Runnable是具体承载任务的对象，Worker继承了AQS自己实现了简单的不可重入独占锁，其中status=0标示锁未被获取状态也就是未被锁住的状态，state=1标示锁已经被获取的状态也就是锁住的状态。
+    DefaultThreadFactory是线程工厂，newThread方法是对线程的一个分组包裹，其中poolNumber是个静态的原子变量，用来统计线程工厂的个数，threadNumber用来记录每个线程工厂创建了多少线程。
+    线程池主要解决两个问题：
+        一方面当执行大量异步任务时候线程池能够提供较好的性能，这是因为使用线程池可以使每个任务的调用开销减少（因为线程池线程是可以复用的）。
+        另一方面线程池提供了一种资源限制和管理的手段，比如当执行一系列任务时候对线程的管理，每个ThreadPoolExecutor也保留了一些基本的统计数据，比如当前线程池完成的任务数目。
+    线程池状态含义：
+        -1  RUNNING：接受新任务并且处理阻塞队列里的任务
+        0   SHUTDOWN：拒绝新任务但是处理阻塞队列里的任务
+        1   STOP：拒绝新任务并且抛弃阻塞队列里的任务同时会中断正在处理的任务
+        2   TIDYING：所有任务都执行完（包含阻塞队列里面任务）当前线程池活动线程为0，将要调用terminated方法
+        3   TERMINATED：终止状态。terminated方法调用完成以后的状态
+    线程池状态转换：
+        RUNNING -> SHUTDOWN
+            显式调用shutdown()方法，或者隐式调用了finalize(),它里面调用了shutdown（）方法。
+        RUNNING or SHUTDOWN)-> STOP
+            显式 shutdownNow()方法
+        SHUTDOWN -> TIDYING
+            当线程池和任务队列都为空的时候
+        STOP -> TIDYING
+            当线程池为空的时候
+        TIDYING -> TERMINATED
+            当 terminated() hook 方法执行完成时候
+    线程池参数：
+        corePoolSize：线程池核心线程个数
+        maximunPoolSize：线程池最大线程数量。
+        keeyAliveTime：存活时间。如果当前线程池中的线程数量比基本数量要多，并且是闲置状态的话，这些闲置的线程能存活的最大时间
+        TimeUnit，存活时间的时间单位
+        workQueue：用于保存等待执行的任务的阻塞队列。
+            （1）不排队，直接提交
+                将任务直接交给线程处理而不保持它们，可使用SynchronousQueue
+                如果不存在可用于立即运行任务的线程（即线程池中的线程都在工作），则试图把任务加入缓冲队列将会失败，因此会构造一个新的线程来处理新添加的任务，并将其加入到线程池中（corePoolSize-->maximumPoolSize扩容）
+                Executors.newCachedThreadPool()采用的便是这种策略
+            （2）无界队列
+                可以使用LinkedBlockingQueue（基于链表的有界队列，FIFO），理论上是该队列可以对无限多的任务排队
+                将导致在所有corePoolSize线程都工作的情况下将新任务加入到队列中。这样，创建的线程就不会超过corePoolSize，也因此，maximumPoolSize的值也就无效了
+                优先级队列PriorityBlockingQueue，无界阻塞队列，具体可参考 https://www.atatech.org/articles/81568
+            （3）有界队列
+                可以使用ArrayBlockingQueue（基于数组结构的有界队列，FIFO），并指定队列的最大长度
+                使用有界队列可以防止资源耗尽，但也会造成超过队列大小和maximumPoolSize后，提交的任务被拒绝的问题，比较难调整和控制。
+        ThreadFactory：创建线程的工厂
+        RejectedExecutionHandler：饱和策略，当队列满了并且线程个数达到maximunPoolSize后采取的策略，
+            （1）AbortPolicy：直接抛出异常，默认策略；
+            （2）CallerRunsPolicy：用调用者所在的线程来执行任务；
+            （3）DiscardOldestPolicy：丢弃阻塞队列中靠最前的任务，并执行当前任务；
+            （4）DiscardPolicy：直接丢弃任务；
+            当然也可以根据应用场景实现RejectedExecutionHandler接口，自定义饱和策略，如记录日志或持久化存储不能处理的任务。
+    线程池类型：
+        newFixedThreadPool
+            创建一个核心线程个数和最大线程个数都为nThreads的线程池，并且阻塞队列长度为Integer.MAX_VALUE，keeyAliveTime=0说明只要线程个数比核心线程个数多并且当前空闲则回收。
+            public static ExecutorService newFixedThreadPool(int nThreads) {
+                   return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+            }
+            //使用自定义线程创建工厂
+            public static ExecutorService newFixedThreadPool(int nThreads, ThreadFactory threadFactory) {
+                return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), threadFactory);
+            }
+        newSingleThreadExecutor
+            创建一个核心线程个数和最大线程个数都为1的线程池，并且阻塞队列长度为Integer.MAX_VALUE，keeyAliveTime=0说明只要线程个数比核心线程个数多并且当前空闲则回收。
+            public static ExecutorService newSingleThreadExecutor() {
+                   return new FinalizableDelegatedExecutorService(new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>()));
+            }
+            //使用自己的线程工厂
+            public static ExecutorService newSingleThreadExecutor(ThreadFactory threadFactory) {
+                return new FinalizableDelegatedExecutorService(new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), threadFactory));
+            }
+        newCachedThreadPool
+            创建一个按需创建线程的线程池，初始线程个数为0，最多线程个数为Integer.MAX_VALUE，并且阻塞队列为同步队列，keeyAliveTime=60说明只要当前线程60s内空闲则回收。这个特殊在于加入到同步队列的任务会被马上被执行，同步队列里面最多只有一个任务，并且存在后马上会拿出执行。
+            public static ExecutorService newCachedThreadPool() {
+                return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
+            }
+            //使用自定义的线程工厂
+            public static ExecutorService newCachedThreadPool(ThreadFactory threadFactory) {
+                return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), threadFactory);
+            }
+        newSingleThreadScheduledExecutor
+            创建一个最小线程个数corePoolSize为1，最大为Integer.MAX_VALUE，阻塞队列为DelayedWorkQueue的线程池。
+            public static ScheduledExecutorService newSingleThreadScheduledExecutor() {
+                return new DelegatedScheduledExecutorService
+                (new ScheduledThreadPoolExecutor(1));
+            }
+        newScheduledThreadPool
+            创建一个最小线程个数corePoolSize，最大为Integer.MAX_VALUE，阻塞队列为DelayedWorkQueue的线程池。
+            public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
+                return new ScheduledThreadPoolExecutor(corePoolSize);
+            }
+    ThreadPoolExecutor线程池执行流程
+        根据ThreadPoolExecutor源码前面大段的注释，我们可以看出，当试图通过execute方法将一个Runnable任务添加到线程池中时，按照如下顺序来处理：
+        （1）如果线程池中的线程数量少于corePoolSize，就创建新的线程来执行新添加的任务；
+        （2）如果线程池中的线程数量大于等于corePoolSize，但队列workQueue未满，则将新添加的任务放到workQueue中，按照FIFO的原则依次等待执行（线程池中有线程空闲出来后依次将队列中的任务交付给空闲的线程执行）；
+        （3）如果线程池中的线程数量大于等于corePoolSize，且队列workQueue已满，但线程池中的线程数量小于maximumPoolSize，则会创建新的线程来处理被添加的任务；
+        （4）如果线程池中的线程数量等于了maximumPoolSize，就用RejectedExecutionHandler来做拒绝处理
+        总结，当有新的任务要处理时，先看线程池中的线程数量是否大于corePoolSize，再看缓冲队列workQueue是否满，最后看线程池中的线程数量是否大于maximumPoolSize
+        另外，当线程池中的线程数量大于corePoolSize时，如果里面有线程的空闲时间超过了keepAliveTime，就将其移除线程池
+![线程池添加线程方法](image/addWorker.png "线程池添加线程方法")
+![execute()--提交任务](image/execute.png "execute()--提交任务")
+
+    执行流程：
+        1、如果线程池当前线程数量少于corePoolSize，则addWorker(command, true)创建新worker线程，如创建成功返回，如没创建成功，则执行后续步骤；
+        addWorker(command, true)失败的原因可能是：
+        A、线程池已经shutdown，shutdown的线程池不再接收新任务
+        B、workerCountOf(c) < corePoolSize 判断后，由于并发，别的线程先创建了worker线程，导致workerCount>=corePoolSize
+        2、如果线程池还在running状态，将task加入workQueue阻塞队列中，如果加入成功，进行double-check，如果加入失败（可能是队列已满），则执行后续步骤；
+        double-check主要目的是判断刚加入workQueue阻塞队列的task是否能被执行
+        A、如果线程池已经不是running状态了，应该拒绝添加新任务，从workQueue中删除任务
+        B、如果线程池是运行状态，或者从workQueue中删除任务失败（刚好有一个线程执行完毕，并消耗了这个任务），确保还有线程执行任务（只要有一个就够了）
+        3、如果线程池不是running状态 或者 无法入队列，尝试开启新线程，扩容至maxPoolSize，如果addWork(command, false)失败了，拒绝当前command
+![runWorker()--执行任务](image/runWorker.png "runWorker()--执行任务")
+
+    执行流程：
+        1、Worker线程启动后，通过Worker类的run()方法调用runWorker(this)
+        2、执行任务之前，首先worker.unlock()，将AQS的state置为0，允许中断当前worker线程
+        3、开始执行firstTask，调用task.run()，在执行任务前会上锁wroker.lock()，在执行完任务后会解锁，为了防止在任务运行时被线程池一些中断操作中断
+        4、在任务执行前后，可以根据业务场景自定义beforeExecute() 和 afterExecute()方法
+        5、无论在beforeExecute()、task.run()、afterExecute()发生异常上抛，都会导致worker线程终止，进入processWorkerExit()处理worker退出的流程
+        6、如正常执行完当前task后，会通过getTask()从阻塞队列中获取新任务，当队列中没有任务，且获取任务超时，那么当前worker也会进入退出流程
+![getTask()--获取任务](image/getTask.png "getTask()--获取任务")
+
+    执行流程：
+        1、首先判断是否可以满足从workQueue中获取任务的条件，不满足return null
+        A、线程池状态是否满足：
+        （a）shutdown状态 + workQueue为空 或 stop状态，都不满足，因为被shutdown后还是要执行workQueue剩余的任务，但workQueue也为空，就可以退出了
+        （b）stop状态，shutdownNow()操作会使线程池进入stop，此时不接受新任务，中断正在执行的任务，workQueue中的任务也不执行了，故return null返回
+        B、线程数量是否超过maximumPoolSize 或 获取任务是否超时
+        （a）线程数量超过maximumPoolSize可能是线程池在运行时被调用了setMaximumPoolSize()被改变了大小，否则已经addWorker()成功不会超过maximumPoolSize
+        （b）如果 当前线程数量>corePoolSize，才会检查是否获取任务超时，这也体现了当线程数量达到maximumPoolSize后，如果一直没有新任务，会逐渐终止worker线程直到corePoolSize
+        2、如果满足获取任务条件，根据是否需要定时获取调用不同方法：
+        A、workQueue.poll()：如果在keepAliveTime时间内，阻塞队列还是没有任务，返回null
+        B、workQueue.take()：如果阻塞队列为空，当前线程会被挂起等待；当队列中有任务加入时，线程被唤醒，take方法返回任务
+        3、在阻塞从workQueue中获取任务时，可以被interrupt()中断，代码中捕获了InterruptedException，重置timedOut为初始值false，再次执行第1步中的判断，满足就继续获取任务，不满足return null，会进入worker退出的流程
+# 第9章 Java并发包中ScheduledThreadPoolExecutor原理探究
+    是一个可以在指定一定延迟时间后或者定时进行任务调度执行的线程池。
+    ScheduledThreadPoolExecutor 继承了 ThreadPoolExecutor 并实现了 ScheduledExecutorService接口。线程池队列是DelayedWorkQueue，其和 DeledQueue类似，是一个延迟队列。
+    它可另行安排在给定的延迟后运行命令，或者定期执行命令。需要多个辅助线程时，或者要求 ThreadPoolExecutor 具有额外的灵活性或功能时。
+    ScheduledThreadPoolExecutor的功能与Timer类似，但比Timer更强大，更灵活，Timer对应的是单个后台线程，而ScheduledThreadPoolExecutor可以在构造函数中指定多个对应的后台线程数。
+    使用Timer和TimerTask存在一些缺陷：
+        1.Timer只创建了一个线程。当你的任务执行的时间超过设置的延时时间将会产生一些问题。
+        2.Timer创建的线程没有处理异常，因此一旦抛出非受检异常，该线程会立即终止。
+    两种类型
+        ScheduledThreadPoolExecutor：执行并行任务也就是多条线程同时执行。
+        SingleThreadScheduledExecutor：执行单条线程。
+    ScheduledFutureTask
+        是具有返回值的任务，继承自FutureTask<V>。FutureTask 的内部有一个变量state用来表示任务的状态，一开始状态为NEW，所有状态为：
+            NEW          = 0; // 初始状态
+            COMPLETING   = 1; // 执行中状态
+            NORMAL       = 2; // 正常运行结束状态
+            EXCEPTIONAL  = 3; // 运行中异常
+            CANCELLED    = 4; // 任务被取消
+            INTERRUPTING = 5; // 任务正在被中断
+            INTERRUPTED  = 6; // 任务已经被中断
+        可能的任务状态转换路径为
+            NEW -> COMPLETING -> NORMAL
+            NEW -> COMPLETING -> EXCEPTIONAL
+            NEW -> CANCELLED
+            NEW -> INTERRUPTING -> INTERRUPTED
+        内部还有一个变量 period 用来表示任务的类型 ，任务类型如下：
+            period=O 说明当前任务是一次性的，执行完毕后就退出了。
+            period为负数，说明当前任务为 fixed-delay 任务，是固定延迟的定时可重复执行任务
+            period为正数，说明当前任务为 fixed-rate 任务 是固定频率的定时可重复执行任务。
 
 # 马士兵多线程
 ## 互联网三高
