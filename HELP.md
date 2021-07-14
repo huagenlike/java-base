@@ -102,7 +102,7 @@
             是当前线程在获取锁时，如果发现锁已经被其他线程占有，它不会马上阻塞自己，在不放弃 CPU 使用权的情况下，多次尝试获取（默认是 10 次），很有可能在后面几次的尝试中其他线程已经释放了该锁。如果尝试指定次数以后仍然没有获取到锁才会阻塞。
         分段锁
             分段锁其实是一种锁的设计，并不是具体的一种锁，对于ConcurrentHashMap而言，其并发的实现就是通过分段锁的形式来实现高效的并发操作。
-# 第3章 Java并发包中ThreadLocalRandom类原理剖析
+## 第3章 Java并发包中ThreadLocalRandom类原理剖析
     Random
         是线程安全的，如果要在线程环境中的话就有可能产生性能瓶颈。
         nextInt()方法调用了next(int bits)，next(int bits)内部使用了AtomicLong，并调用了它的compareAndSet方法来保证线程安全性。所以这个是一个线程安全的方法。
@@ -114,7 +114,7 @@
         其中seed和probeGenerator是原子变量，他是在初始化种子的时候使用，每个线程只会调用一次，另外变量instance是ThreadLocalRandom的一个实例，该变量是static,多个线程使用的实例是同一个，但是由于具体的种子存在在线程里面的，所以在ThreadlocalRandom的实例里面只包含线程无关的的通用算法，因此他是线程安全的。
         if (UNSAFE.getInt(Thread.currentThread(), PROBE) == 0)：如上面代码(7)，如果线程的threadlocalRandomProbe的变量值为0时(默认他的值就是0)，则说明他是第一次调用current，那么就会使用localinit()方法计算当前线程的初始化种子，这里是为了延迟初始化，在不使用生成随机数功能时，就不会初始化线程的种子变量，这也是一种优化，
         localInit();：代码(8)首先根据probeGenerator计算当前线程中ThreadLocalRandomProbe的初始值，然后根据seeder计算当前线程的初始化种子，而后把这两个变量放到当前线程，代码9返回ThreadLocalRandom的实例，需要注意的是这个方法是静态方法，多个线程返回的是同一个实例，
-# 第4章 java并发包中原子操作类原理剖析
+## 第4章 java并发包中原子操作类原理剖析
     JUC 并发包中包含有 Atomiclnteger、AtomicLong和tomicBoolean 等原子性操作类，它们的原理类似，本章讲解 AtomicLong 类。 
     AtomicLong 是原子性递增或者递减类，其内部使用 Unsafe 来实现。
     AtomicLong
@@ -136,13 +136,13 @@
         在低竞争的并发环境下 AtomicInteger 的性能是要比 LongAdder 的性能好，而高竞争环境下 LongAdder 的性能比 AtomicInteger 好，因此我们在使用时要结合自身的业务情况来选择相应的类型。
     LongAccumulator 类原理探究
         分段进行CAS重试，最后结果再累加，提升了程序的并行性能 
-# 第5章 Java并发包中并发List源码剖析
+## 第5章 Java并发包中并发List源码剖析
     CopyOnWriteArrayList
         并发包中的并发List只有CopyOnWriteArrayList。
         CopyOnWriteArrayList使用写时复制的策略，来保证list的一致性，而获取-修改-写入，这三步操作不是原子性的，所以，在增删改的过程中都使用了独占锁，来保证在某个时刻，只有一个线程能对list进行操作，是线程安全的，但是写时复制会导致弱一致性问题。
         另外，CopyOnWriteArrayList 提供了弱一致性的迭代器，从而保证在获取迭代器后，其他线程对 list 的修改是不可见的，迭代器遍历的数组是一个快照。
         而且，CopyOnWriteArraySet 的底层是 使用 CopyOnWriteArrayList 实现的。
-# 第6章 Java并发包中锁原理剖析
+## 第6章 Java并发包中锁原理剖析
     LockSupport工具类
         JDK 中的 rt.jar 包里面的 LockSupport 是个工具类，它的主要作用是挂起和唤醒线程，该工具类是创建锁和其他同步类的基础。
         LockSupport类的核心方法其实就两个：park()和unpark()，其中park()方法用来阻塞当前调用线程，unpark()方法用于唤醒指定线程。
@@ -214,7 +214,7 @@
             当前锁处于读锁模式， 并且没有其他线程是读锁模式。
             当前处于乐观读模式，井且当前写锁可用。
         Stampedlock提供的读写锁与 Reentrantread Writelock类似,只是前者提供的是不可重入锁。但是前者通过提供乐观读锁在多线程多读的情况下提供了更好的性能,这是因为获取乐观读锁时不需要进行CAS操作设置锁的状态,而只是简单地测试状态。
-# 第7章 Java并发包中并发队列原理剖析【未细看】
+## 第7章 Java并发包中并发队列原理剖析【未细看】
     ConcurrentlinkedQueue 原理探究
         一个基于链接节点的无界线程安全队列。此队列按照 FIFO（先进先出）原则对元素进行排序。队列的头部 是队列中时间最长的元素。队列的尾部 是队列中时间最短的元素。
         新的元素插入到队列的尾部，队列获取操作从队列头部获得元素。当多个线程共享访问一个公共 collection 时，ConcurrentLinkedQueue 是一个恰当的选择。此队列不允许使用 null 元素。
@@ -232,7 +232,7 @@
         为了解决这个问题，我们可以使用另外一种逻辑结构来处理数组中各个位置之间的关系。假设现在我们有一个数组A[1…n]，我们可以把它想象成一个环型结构，即A[n]之后是A[1]，相信了解过一致性Hash算法的童鞋应该很容易能够理解。如下图所示：我们可以使用两个指针，分别维护队头和队尾两个位置，使入队和出队操作都可以在O(1)的时间内完成。
     PriorityBlockingQueue 原理探究
         是一个支持优先级的无界阻塞队列，直到系统资源耗尽。
-# 第8章 Java并发包中线程池ThreadPoolExecutor原理探究
+## 第8章 Java并发包中线程池ThreadPoolExecutor原理探究
     runStateOf(int c)  方法：c & 高3位为1，低29位为0的~CAPACITY，用于获取高3位保存的线程池状态
     workerCountOf(int c)方法：c & 高3位为0，低29位为1的CAPACITY，用于获取低29位的线程数量
     ctlOf(int rs, int wc)方法：参数rs表示runState，参数wc表示workerCount，即根据runState和workerCount打包合并成ctl
@@ -365,7 +365,7 @@
         A、workQueue.poll()：如果在keepAliveTime时间内，阻塞队列还是没有任务，返回null
         B、workQueue.take()：如果阻塞队列为空，当前线程会被挂起等待；当队列中有任务加入时，线程被唤醒，take方法返回任务
         3、在阻塞从workQueue中获取任务时，可以被interrupt()中断，代码中捕获了InterruptedException，重置timedOut为初始值false，再次执行第1步中的判断，满足就继续获取任务，不满足return null，会进入worker退出的流程
-# 第9章 Java并发包中ScheduledThreadPoolExecutor原理探究
+## 第9章 Java并发包中ScheduledThreadPoolExecutor原理探究
     是一个可以在指定一定延迟时间后或者定时进行任务调度执行的线程池。
     ScheduledThreadPoolExecutor 继承了 ThreadPoolExecutor 并实现了 ScheduledExecutorService接口。线程池队列是DelayedWorkQueue，其和 DeledQueue类似，是一个延迟队列。
     它可另行安排在给定的延迟后运行命令，或者定期执行命令。需要多个辅助线程时，或者要求 ThreadPoolExecutor 具有额外的灵活性或功能时。
@@ -394,6 +394,39 @@
             period=O 说明当前任务是一次性的，执行完毕后就退出了。
             period为负数，说明当前任务为 fixed-delay 任务，是固定延迟的定时可重复执行任务
             period为正数，说明当前任务为 fixed-rate 任务 是固定频率的定时可重复执行任务。
+## 第10章 Java 并发包中线程同步器原理剖析
+### CountDownLatch（栅栏） 原理剖析
+        CountDownLatch扮演的是一个类似计数器的角色，等待计数器为零，也俗称闭锁。
+        首先初始化一个计数器，await方法之前的线程每执行一次计数器减一，直到计数器执为零，就会放弃阻塞，await所有被屏障拦截的线程才会继续运行。
+        当我们调用CountDownLatch的countDown方法时，计数器n就会减1，CountDownLatch的await方法判断计数器是否大于零，如果大于零就会阻塞当前线程，直到计数器变成零就不会再继续阻塞。
+        由于countDown方法可以用在任何地方，所以这里说的n个点，可以是n个线程，也可以是1个线程里的n个执行步骤。用在多个线程时，只需要把这个CountDownLatch的引用传递到线程里即可。
+### 回环屏障 CyclicBarrier（循环栅栏） 原理探究
+        CyclicBarrier的字面意思是可循环使用（Cyclic）的屏障（Barrier）。
+        它要做的事情是，让一组线程到达一个屏障（也可以叫同步点）时被阻塞，直到最后一个线程到达屏障时，屏障才会开门，所有被屏障拦截的线程才会继续运行，强调线程间相互等待，扮演着栅栏的角色。
+        内部是通过条件队列trip来对线程进行阻塞的，并且其内部维护了两个int型的变量parties和count，parties表示每次拦截的线程数，该值在构造时进行赋值。
+        count是内部计数器，它的初始值和parties相同，以后随着每次await方法的调用而减1，直到减为0就将所有线程唤醒。
+        CyclicBarrier有一个静态内部类Generation，该类的对象代表栅栏的当前代，就像玩游戏时代表的本局游戏，利用它可以实现循环等待。
+        barrierCommand表示换代前执行的任务，当count减为0时表示本局游戏结束，需要转到下一局。在转到下一局游戏之前会将所有阻塞的线程唤醒，在唤醒所有线程之前你可以通过指定barrierCommand来执行自己的任务。
+    CyclicBarrier和CountDownLatch的区别
+        CountDownLatch一般用于一个线程等待其他若干线程完成后才执行，即一等多。
+        CyclicBarrier一般用于多个线程的相互等待，最后一起执行某种操作，即多个相互等。
+        所以，CyclicBarrier可以用于多线程计算数据，最后合并计算结果的场景。
+        CountDownLatch计数器只能使用一次，不可重复使用。
+        CyclicBarrier的计数器可以使用reset()方法重置计数器，即重复使用。
+        所以CyclicBarrier能处理更为复杂的业务场景。例如，如果计算发生错误，可以重置计数器，并让线程重新执行一次。
+![CyclicBarrier()--循环栅栏](image/CyclicBarrier.png "循环栅栏")
+
+### 信号量 Semaphore 原理探究
+    Semaphore 也是使用AQS实现的，并且获取信号量时有公平策略和非公平策略之分。
+    信号量也是Java中的一个同步器,与CountDownLatch和CyclicBarrier不同的是,它内部的计数器是递增的,并且在一开始初始化Semaphore时可以指定一个初始值,但是并不需要知道需要同步的线程个数,而是在需要同步的地方调用acquire方法时指定需要同步的线程个数。
+    使用场景
+        通常用于那些资源有明确访问数量限制的场景，常用于限流。
+        比如：数据库连接池，同时进行连接的线程有数量限制，连接不能超过一定的数量，当连接达到了限制数量后，后面的线程只能排队等前面的线程释放了数据库连接才能获得数据库连接。
+        比如：停车场场景，车位数量有限，同时只能容纳多少台车，车位满了之后只有等里面的车离开停车场外面的车才可以进入。
+## 第11章 并发编程实战
+    ArrayBlockingQueue 的使用
+        讲解 logback 异步日志打印中，ArrayBlockingQueue 的使用。
+
 
 # 马士兵多线程
 ## 互联网三高
