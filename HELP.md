@@ -426,8 +426,22 @@
 ## 第11章 并发编程实战
     ArrayBlockingQueue 的使用
         讲解 logback 异步日志打印中，ArrayBlockingQueue 的使用。
-
-
+    并发组件 ConcurrentHashMap 使用注意事项
+        总结:put(Kkey, V value)方法判断如果key已经存在,则使用value覆盖原来的值并返回原来的值,如果不存在则把value放入并返回null。
+        而putIfAbsent(Kkey, value)方法则是如果key已经存在则直接返回原来对应的值并不使用vaue覆盖,如果key不存在则放入value并返回nll,另外要注意,判断key是否存在和放入是原子性操作。
+    SimpleDateFormat 是线程不安全的
+        是java提供的一个格式化和解析日期的工具类，在日常开发中经常用到，但是由于它是线程不安全的，多线程下公用一个 SimpleDateFormat 实例对日期进行解析或者格式化会导致程序出错。
+        本节通过简单介绍 SimpleDateFormat 的原理解释了为何 SimpleDateFormat 是线程不安全的，应该避免在多线程下使用 SimpleDateFormat 单个实例
+    使用 Timer 时需要注意的事情
+        当一个Timer行多个TimerTask时，只要其中一个TimerTask在执行中向run方法外抛出了异常，则其他任务也会自动终止。
+        当任务在执行过程中抛出 InterruptedException之外的异常时,唯一的消费线程就会因为抛出异常而终止,那么队列里的其他待执行的任务就会被清除。
+        所以在TimerTask的run方法内最好使用try-catch结构捕捉可能的异常,不要把异常抛到run方法之外。
+        其实要实现Timer功能,使用 ScheduledThreadPoolExecutor的schedule是比较好的选择。如果ScheduledThreadPoolExecutor中的一个任务抛出异常,其他任务则不受影响。
+        TaskQueue是一个由平衡二叉树堆实现的优先队列，每个Timer对象内部有一个TaskQueue队列。
+        Scheduledthreadpoolexecutor是并发包提供的组件,其提供的功能包含但不限于Timer。
+        Timer是固定的多线程生产单线程消费,但是 ScheduledThreadPoolExecutor是可以配置的,既可以是多线程生产单线程消费也可以是多线程生产多线程消费,所以在日常开发中使用定时器功能时应该优先使用ScheduledThreadPoolExecutor
+    对需要复用但是会被下游修改的参数要进行深复制
+        
 # 马士兵多线程
 ## 互联网三高
     高性能、高拓展、高可用
