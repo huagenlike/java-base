@@ -16,6 +16,8 @@ public class RuntimeConstantPoolOOM1 {
     public static void main(String[] args) {
         String str1 = new StringBuilder("计算机").append("软件").toString();
         System.out.println(str1.intern() == str1);
+        // "java"这个字符串它是在加载sun.misc.Version这个类的时候进入常量池的。
+        // 本书第2版并未解释java这个字符串此前是哪里出现的，所以被批评“挖坑不填了”（无奈地摊手）。如读者感兴趣是如何找出来的，可参考Red- naxelaFX的知乎回答（https://www.zhihu.com/question/51102308/answer/124441115）。
         String str2 = new StringBuilder("ja").append("va").toString();
         System.out.println(str2.intern() == str2);
     }

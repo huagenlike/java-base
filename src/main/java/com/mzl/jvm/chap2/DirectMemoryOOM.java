@@ -8,8 +8,9 @@ import java.lang.reflect.Field;
  * @author lihuagen
  * @version 1.0
  * @className: DirectMemoryOOM
- * @description: 使用unsafe分配本机内存
+ * @description: 本机直接内存溢出-使用unsafe分配本机内存
  * @date 2021/7/20 15:05
+ * jvm：-Xmx20M -XX:MaxDirectMemorySize=10M
  * 过反射获取Unsafe实例进行内存分配（Unsafe类的getUnsafe()方法指定只有引导类加载器才会返回实例，体现了设计者希望只有虚拟机标准类库里面的类才能使用Unsafe的功能，
  * 在JDK 10时才将Unsafe 的部分功能通过VarHandle开放给外部使用），因为虽然使用DirectByteBuffer分配内存也会抛出内存溢出异常，但它抛出异常时并没有真正向操作系统申请分配内存，而是通过计算得知内存无法分配就会在代码里手动抛出溢出异常，真正申请分配内存的方法是Unsafe::allocateMemory()。
  */
