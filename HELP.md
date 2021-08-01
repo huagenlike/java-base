@@ -264,6 +264,10 @@
         keeyAliveTime：存活时间。如果当前线程池中的线程数量比基本数量要多，并且是闲置状态的话，这些闲置的线程能存活的最大时间
         TimeUnit，存活时间的时间单位
         workQueue：用于保存等待执行的任务的阻塞队列。
+            ArrayBlockingQueue：是一个基于数组结构的有界阻塞队列，此队列按FIFO（先进先出）原则对元素进行排序。 
+            LinkedBlockingQueue：是一个基于链表结构的阻塞队列，此队列按FIFO排序元素，吞吐量通常要高于ArrayBlockingQueue。静态工厂方法Executors.newFixedThreadPool()使用了这个队列。 
+            SynchronousQueue：是一个不存储元素的阻塞队列。每个插入操作必须等到另一个线程调用移除操作，否则插入操作一直处于阻塞状态，吞吐量通常要高于Linked-BlockingQueue，静态工厂方法Executors.newCachedThreadPool使用了这个队列。 
+            PriorityBlockingQueue：一个具有优先级的无限阻塞队列。
             （1）不排队，直接提交
                 将任务直接交给线程处理而不保持它们，可使用SynchronousQueue
                 如果不存在可用于立即运行任务的线程（即线程池中的线程都在工作），则试图把任务加入缓冲队列将会失败，因此会构造一个新的线程来处理新添加的任务，并将其加入到线程池中（corePoolSize-->maximumPoolSize扩容）
@@ -283,7 +287,9 @@
             （4）DiscardPolicy：直接丢弃任务；
             当然也可以根据应用场景实现RejectedExecutionHandler接口，自定义饱和策略，如记录日志或持久化存储不能处理的任务。
     线程池类型：
-        newFixedThreadPool
+        newFixedThreadPool（适用于负载比较重的服务器） 
+            可重用固定线程数的线程池。FixedThreadPool使用无界队列LinkedBlockingQueue作为线程池的工作队列 该线程池中的线程数量始终不变。
+            当有一个新的任务提交时，线程池中若有空闲线程，则立即执行。若没有，则新的任务会被暂存在一个任务队列中，待有线程空闲时，便处理在任务队列中的任务。
             创建一个核心线程个数和最大线程个数都为nThreads的线程池，并且阻塞队列长度为Integer.MAX_VALUE，keeyAliveTime=0说明只要线程个数比核心线程个数多并且当前空闲则回收。
             public static ExecutorService newFixedThreadPool(int nThreads) {
                    return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
@@ -292,7 +298,8 @@
             public static ExecutorService newFixedThreadPool(int nThreads, ThreadFactory threadFactory) {
                 return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), threadFactory);
             }
-        newSingleThreadExecutor
+        newSingleThreadExecutor（适用于需要保证顺序执行各个任务；并且在任意时间点，没有多线程活动的场景。） 
+            只会创建一个线程执行任务。SingleThreadExecutorl也使用无界队列LinkedBlockingQueue作为工作队列 若多余一个任务被提交到该线程池，任务会被保存在一个任务队列中，待线程空闲，按先入先出的顺序执行队列中的任务。
             创建一个核心线程个数和最大线程个数都为1的线程池，并且阻塞队列长度为Integer.MAX_VALUE，keeyAliveTime=0说明只要线程个数比核心线程个数多并且当前空闲则回收。
             public static ExecutorService newSingleThreadExecutor() {
                    return new FinalizableDelegatedExecutorService(new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>()));
@@ -301,7 +308,9 @@
             public static ExecutorService newSingleThreadExecutor(ThreadFactory threadFactory) {
                 return new FinalizableDelegatedExecutorService(new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), threadFactory));
             }
-        newCachedThreadPool
+        newCachedThreadPool（大小无界，适用于执行很多的短期异步任务的小程序，或负载较轻的服务器） 
+            是一个会根据需要调整线程数量的线程池。CachedThreadPool使用没有容量的SynchronousQueue作为线程池的工作队列，但CachedThreadPool的maximumPool是无界的。 
+            线程池的线程数量不确定，但若有空闲线程可以复用，则会优先使用可复用的线程。若所有线程均在工作，又有新的任务提交，则会创建新的线程处理任务。所有线程在当前任务执行完毕后，将返回线程池进行复用。
             创建一个按需创建线程的线程池，初始线程个数为0，最多线程个数为Integer.MAX_VALUE，并且阻塞队列为同步队列，keeyAliveTime=60说明只要当前线程60s内空闲则回收。这个特殊在于加入到同步队列的任务会被马上被执行，同步队列里面最多只有一个任务，并且存在后马上会拿出执行。
             public static ExecutorService newCachedThreadPool() {
                 return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
@@ -316,7 +325,8 @@
                 return new DelegatedScheduledExecutorService
                 (new ScheduledThreadPoolExecutor(1));
             }
-        newScheduledThreadPool
+        newScheduledThreadPool（在给定的延迟之后运行任务，或者定期执行任务）
+            继承自ThreadPoolExecutor。使用DelayQueue作为任务队列。
             创建一个最小线程个数corePoolSize，最大为Integer.MAX_VALUE，阻塞队列为DelayedWorkQueue的线程池。
             public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
                 return new ScheduledThreadPoolExecutor(corePoolSize);
@@ -426,7 +436,33 @@
 ## 第11章 并发编程实战
     ArrayBlockingQueue 的使用
         讲解 logback 异步日志打印中，ArrayBlockingQueue 的使用。
-
+    并发组件 ConcurrentHashMap 使用注意事项
+        总结:put(Kkey, V value)方法判断如果key已经存在,则使用value覆盖原来的值并返回原来的值,如果不存在则把value放入并返回null。
+        而putIfAbsent(Kkey, value)方法则是如果key已经存在则直接返回原来对应的值并不使用vaue覆盖,如果key不存在则放入value并返回nll,另外要注意,判断key是否存在和放入是原子性操作。
+    SimpleDateFormat 是线程不安全的
+        是java提供的一个格式化和解析日期的工具类，在日常开发中经常用到，但是由于它是线程不安全的，多线程下公用一个 SimpleDateFormat 实例对日期进行解析或者格式化会导致程序出错。
+        本节通过简单介绍 SimpleDateFormat 的原理解释了为何 SimpleDateFormat 是线程不安全的，应该避免在多线程下使用 SimpleDateFormat 单个实例
+    使用 Timer 时需要注意的事情
+        当一个Timer行多个TimerTask时，只要其中一个TimerTask在执行中向run方法外抛出了异常，则其他任务也会自动终止。
+        当任务在执行过程中抛出 InterruptedException之外的异常时,唯一的消费线程就会因为抛出异常而终止,那么队列里的其他待执行的任务就会被清除。
+        所以在TimerTask的run方法内最好使用try-catch结构捕捉可能的异常,不要把异常抛到run方法之外。
+        其实要实现Timer功能,使用 ScheduledThreadPoolExecutor的schedule是比较好的选择。如果ScheduledThreadPoolExecutor中的一个任务抛出异常,其他任务则不受影响。
+        TaskQueue是一个由平衡二叉树堆实现的优先队列，每个Timer对象内部有一个TaskQueue队列。
+        Scheduledthreadpoolexecutor是并发包提供的组件,其提供的功能包含但不限于Timer。
+        Timer是固定的多线程生产单线程消费,但是 ScheduledThreadPoolExecutor是可以配置的,既可以是多线程生产单线程消费也可以是多线程生产多线程消费,所以在日常开发中使用定时器功能时应该优先使用ScheduledThreadPoolExecutor
+    对需要复用但是会被下游修改的参数要进行深复制
+        本节通过一个简单的消息发送例子说明了需要复用但是会被下游修改的参数要进行深复制,否则会导致出现错误的结果;另外引用类型作为集合元素时,如果使用这个集合作为另外一个集合的构造函数参数,会导致两个集合里面的同一个位置的元素指向的是同个引用,这会导致对引用的修改在两个集合中都可见,所以这时候需要对引用元素进行深复制。
+    创建线程和线程池时要指定与业务相关的名称
+        本节通过简单的例子介绍了为何不为线程或者线程池起名字会给问题排查带来麻烦然后通过源码分析介绍了线程和线程池名称及默认名称是如何来的,以及如何定义线程池名称以便追溯问题。
+        另外,在run方法内使用try-catch块,避免将异常抛到run方法之外同时打印日志也是一个最佳实践。
+    使用线程池的情况下当程序结束时记得调用shutdown关闭线程池
+        本节通过一个简单的使用线程池异步执行任务的案例介绍了使用完线程池后如果不调用 shutdown方法,则会导致线程池的线程资源一直不会被释放,并通过源码分析了没有被释放的原因。
+        所以在日常开发中使用线程池后一定不要忘记调用 shutdown方法关闭。
+    线程池使用 FutureTask 时需要注意的事情
+        本节通过案例介绍了在线程池中使用 Futuretask时,当拒绝策略为 Discardpolicy和Discardoldest Policy时,在被拒绝的任务的 Future Task对象上调用geto方法会导致调用线程一直阻塞,所以在日常开发中尽量使用带超时参数的get方法以避免线程一直阻塞。
+    使用 ThreadLocal 不当可能会导致内存泄漏
+        总结:如果在线程池里面设置了 Thread Local变量,则一定要记得及时清理,因为线程池里面的核心线程是一直存在的,如果不清理,线程池的核心线程的 threadlocals变量会一直持有 Threadlocal变量
+        在Tomcat的 Servlet 中使用 ThreadLocal 导致内存泄漏
 
 # 马士兵多线程
 ## 互联网三高
