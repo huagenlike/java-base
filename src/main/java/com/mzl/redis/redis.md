@@ -7,9 +7,28 @@
     5种数据结构类型分别为STRING（字符串）、LIST（列表）、SET（集合）、HASH（散列）和ZSET（有序集合）。
     下面是一些常用命令
     String类型
-        新增 set hello world
-        查询 get hello
-        删除 del hello
+        set key1 world
+            新增key1，值为world
+        incr key1
+            将键存储的值加一，如果key1不存在，则当做0，如果值不能被解释为十进制数或浮点数，则会报错
+        decr key1
+            将键存储的值减一，如果key1不存在，则当做0，如果值不能被解释为十进制数或浮点数，则会报错
+        incrby key1 10
+            将键存储的值加上整数10，如果值不能被解释为十进制数或浮点数，则会报错
+        decrby key1 20
+            将键存储的值减去整数10，如果值不能被解释为十进制数或浮点数，则会报错
+        incrbyfloat key1 10.10
+            将键存储的值加上浮点数10.10，如果值不能被解释为十进制数或浮点数，则会报错
+        get key1
+            查询key
+        del key1
+            删除key
+        append key1 world
+            将值 world 追加到给定键key1当前存储的值的末尾
+        getrange key1 2 4
+            获取key1由偏移量start至偏移量end范围内的字符串组成的子串，包括start 和 end在内
+        setrange key1 5 w
+            命令用指定的字符串覆盖给定 key 所储存的字符串值，覆盖的位置从偏移量 offset（这里对应 5） 开始。
     list类型[linked-list]（值可以重复）
         将给定的值推入列表的右端 rpush list-key item
         将给定的值推入列表的左端 lpush list-key item1
@@ -34,7 +53,7 @@
         根据元素在有序排列中所处的位置，从有序集合里面获取多个元素 zrange zset-key 0 -1 withscores
         获取有序集合在给定分值范围内的所有元素 zrangebyscore zset-key 0 800 withscores
         如果给定成员存在于有序集合，那么移除这个成员 zrem zset-key member1
-
+## 第2章　使用Redis构建Web应用
 
 
 
