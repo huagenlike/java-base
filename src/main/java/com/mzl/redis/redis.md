@@ -242,8 +242,90 @@
     EXPIREAT和PEXPIREAT，EXPIREAT命令与EXPIRE命令的差别在于前者使用Unix时间作为第二个参数表示键的过期时刻。PEXPIREAT命令与EXPIREAT命令的区别是前者的时间单位是毫秒。
         示例：EXPIREAT foo 1351858600
     如果使用 WATCH命令监测了一个拥有过期时间的键，该键时间到期自动删除并不会被WATCH命令认为该键被改变。
-#### 实现访问频率限制之一
-
+#### 实现缓存
+    redis提供6中数据淘汰策略，可在redis.conf中配置：maxmemory-policy noeviction
+        noeviction：禁止驱逐数据。默认配置都是这个。当内存使用达到阀值的时候，所有引起申请内存的命令都会报错。
+        volatile-lru：从设置了过期时间的数据集中挑选最近最少使用的数据淘汰。
+        volatile-ttl：从已设置了过期时间的数据集中挑选即将要过期的数据淘汰。
+        volatile-random：从已设置了过期时间的数据集中任意选择数据淘汰。
+        allkeys-lru：从数据集中挑选最近最少使用的数据淘汰。
+        allkeys-random：从数据集中任意选择数据淘汰。
+    当Redis确定好要驱逐某个键值对后，会删除这个数据，并将这个数据变更消息同步到本地和从机。
+### 排序
+#### SORT命令
+    可以借助 Redis 提供的 SORT命令来解决小白的问题。
+    SORT命令可以对列表类型、集合类型和有序集合类型键进行排序，并且可以完成与关系数据库中的连接查询相类似的任务。
+    集合类型
+        sadd tag:ruby:posts 2 6 12 26
+        SORT tag：ruby：posts
+    列表类型
+        redis> LPUSH mylist 4 2 6 1 3 7
+        redis> SORT mylist
+    对有序集合类型排序时会忽略元素的分数，只针对元素自身的值进行排序。
+        redis> ZADD myzset 50 2 40 3 20 1 60 5
+        redis> SORT myzset
+    除了可以排列数字外，SORT命令还可以通过ALPHA参数实现按照字典顺序排列非数字元素，就像这样：    
+        redis> LPUSH mylistalpha a c e d B C A
+        redis> SORT mylistalpha ALPHA
+        如果没有加ALPHA参数的话，SORT命令会尝试将所有元素转换成双精度浮点数来比较，如果无法转换则会提示错误。
+    SORT命令的DESC参数可以实现将元素按照从大到小的顺序排列：
+        redis> SORT tag：ruby：posts DESC
+    SORT命令还支持LIMIT参数来返回指定范围的结果。用法和 SQL 语句一样，LIMIT offset count，表示跳过前 offset 个元素并获取之后的count个元素。
+        SORT命令的参数可以组合使用，像这样：
+        redis> SORT tag：ruby：posts DESC LIMIT 1 2
+#### BY参数
+    如果提供了 BY 参数，SORT 命令将不再依据元素自身的值进行排序，而是对每个元素使用元素的值替换参考键中的第一个“*”并获取其值，然后依据该值对元素排序。
+        sort tag:ruby:posts by post:*->time desc
+    除了散列类型之外，参考键还可以是字符串类型，比如
+        127.0.0.1:6379> lpush sortbylist 2 1 3
+        127.0.0.1:6379> set itemscore:1 50
+        127.0.0.1:6379> set itemscore:2 100
+        127.0.0.1:6379> set itemscore:3 -10
+        127.0.0.1:6379> sort sortbylist by itemscore:* desc
+        1) "2"
+        2) "1"
+        3) "3"
+        127.0.0.1:6379> sort sortbylist by itemscore:*
+        1) "3"
+        2) "1"
+        3) "2"
+    当参考键名不包含“*”时（即常量键名，与元素值无关），SORT 命令将不会执行排序操作，因为Redis认为这种情况是没有意义的（因为所有要比较的值都一样）。
+    redis> SORT sortbylist BY anytext
+        例子中 anytext 是常量键名（甚至 anytext 键可以不存在），此时 SORT 的结果与LRANGE的结果相同，没有执行排序操作。在不需要排序但需要借助SORT命令获得与元素相关联的数据时（见4.3.4节），常量键名是很有用的。
+    redis> LPUSH sortbylist 4
+    redis> SET itemscore：4 50
+    redis> SORT sortbylist BY itemscore：* DESC
+        示例中元素"4"的参考键itemscore：4的值和元素"1"的参考键itemscore：1的值都是50，所以SORT命令会再比较"4"和"1"元素本身的大小来决定二者的顺序。
+    redis> LPUSH sortbylist 5
+    redis> SORT sortbylist BY itemscore：* DESC
+    1) "2"
+    2) "4"
+    3) "1"
+    4) "5"
+    5) "3"
+        当某个元素的参考键不存在时，会默认参考键的值为0，上例中"5"排在了"3"的前面，是因为"5"的参考键不存在，所以默认为 0，而"3"的参考键值为−10。
+    参考键虽然支持散列类型，但是“*”只能在“->”符号前面（即键名部分）才有用，在“->”后（即字段名部分）会被当成字段名本身而不会作为占位符被元素的值替换，即常量键名。但是实际运行时会发现一个有趣的结果：
+        redis> SORT sortbylist BY somekey->somefield：*
+        1) "1"
+        2) "2"
+        3) "3"
+        4) "4"
+        5) "5"
+        上面提到了当参考键名是常量键名时 SORT 命令将不会执行排序操作，然而上例中确进行了排序，而且只是对元素本身进行排序。这是因为 Redis 判断参考键名是不是常量键名的方式是判断参考键名中是否包含“*”，而 somekey->somefield：*中包含“*”所以不是常量键名。所以在排序的时候Redis对每个元素都会读取键somekey中的 somefield：*字段（“*”不会被替换），无论能否获得其值，每个元素的参考键值是相同的，所以Redis会按照元素本身的大小排列。
+#### GET参数
+    GET参数不影响排序，它的作用是使 SORT命令的返回结果不再是元素自身的值，而是GET参数中指定的键值。
+    GET参数的规则和BY参数一样，GET参数也支持字符串类型和散列类型的键，并使用“*”作为占位符。要实现在排序后直接返回ID对应的文章标题，
+    sort tag:ruby:posts by post:*->time desc get post:*->title
+        在排序后直接返回ID对应的文章标题
+    sort tag:ruby:posts by post:*->time desc get post:*->title get post:*->time
+        在一个SORT命令中可以有多个GET参数（而BY参数只能有一个），所以还可以这样用
+    SORT命令的时间复杂度是O(n+mlog(m))，其中n表示要排序的列表（集合或有序集合）中的元素个数，m表示要返回的元素个数。
+    所以开发中使用SORT命令时需要注意以下几点。
+        （1）尽可能减少待排序键中元素的数量（使N尽可能小）。
+        （2）使用LIMIT参数只获取需要的数据（使M尽可能小）。
+        （3）如果要排序的数据数量较大，尽可能使用STORE参数将结果缓存。
+### 消息通知
+    
 ## 第2章　使用Redis构建Web应用
 
 
