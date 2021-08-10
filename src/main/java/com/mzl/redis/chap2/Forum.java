@@ -1,11 +1,11 @@
 package com.mzl.redis.chap2;
 
 import com.alibaba.fastjson.JSONObject;
-import org.thymeleaf.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,9 +26,11 @@ public class Forum {
         conn.select(0);
 //        articlePublishing(conn);
 //        accessFrequencyRestriction(conn);
-        accessFrequencyRestriction1(conn);
+//        accessFrequencyRestriction1(conn);
 //        accessFrequencyRestrictionTransaction(conn);
 //        testTx(conn);
+//        redisAchieveTaskQueue(conn);
+        redisAchieveTaskQueueOptimization(conn);
     }
     /**
      * 文章发表
@@ -156,6 +158,86 @@ public class Forum {
         if(null!=exec){
             exec.stream().forEach(System.out::println);
         }
+    }
+    
+    /**
+     * 使用Redis实现任务队列
+     */
+    public void redisAchieveTaskQueue(Jedis conn) {
+        // 消费者
+        // 存在问题：如果key没值，也会执行循环，浪费性能
+        Thread threadA = new Thread(() -> {
+            while (true) {
+                String quque = conn.rpop("queue");
+                if (StringUtils.isNotEmpty(quque)) {
+                    System.out.println("value is ：" + quque);
+                } else {
+                    try {
+                        System.out.println("休眠1秒钟");
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+        // 生产者
+        Thread threadB = new Thread(() -> {
+            List<String> strings = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k");
+
+            for (int i = 0; i < strings.size(); i++) {
+                conn.lpush("queue", strings.get(i));
+                System.out.println("将值" + strings.get(i) + "存入key为 queue");
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        threadA.start();
+        threadB.start();
+    }
+
+    /**
+     * 使用Redis实现任务队列（优化）
+     */
+    public void redisAchieveTaskQueueOptimization(Jedis conn) throws InterruptedException {
+        // 消费者
+        Thread threadA = new Thread(() -> {
+            while (true) {
+                // 如果任务队列中没有新任务，BRPOP 命令会一直阻塞，不会执行 execute()
+                try {
+                    List<String> strings = conn.brpop("queue","30");
+                    for (String string : strings) {
+                        System.out.println("移除值" + string);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        // 生产者
+        Thread threadB = new Thread(() -> {
+            List<String> strings = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k");
+
+            for (int i = 0; i < strings.size(); i++) {
+                conn.lpush("queue", strings.get(i));
+                System.out.println("将值" + strings.get(i) + "存入key为 queue");
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        threadB.start();
+        Thread.sleep(2000);
+        threadA.start();
     }
 
 }
