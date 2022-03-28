@@ -2,7 +2,9 @@ package com.mzl.performanceTuning.chap1;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,8 +17,18 @@ import java.util.regex.Pattern;
  */
 public class StringTest {
     public static void main(String[] args) throws Exception {
-        demo3();
-        demo4();
+        demo();
+//        demo3();
+//        demo4();
+    }
+
+    public static void demo() {
+        List<Integer> list = new ArrayList<>();
+        String str = "abcde";
+        for (int i = 0; i < 5000000; i++) {
+            str += i;
+            list.add(i);
+        }
     }
 
     public static void equalsTest() {
