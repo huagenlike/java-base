@@ -76,6 +76,7 @@ public class SingleLinkedListDemo {
 
     /**
      * 将单链表反转（可以利用栈这个数据结构，将各个节点压入到栈中，然后利用栈的先进后出的特点，就实现了逆序打印的效果）
+     *
      * @param head
      */
     public static void reversePrint(HeroNode head) {
@@ -95,6 +96,7 @@ public class SingleLinkedListDemo {
 
     /**
      * 将单链表反转
+     *
      * @param head
      */
     public static void reversetList(HeroNode head) {
@@ -137,14 +139,15 @@ public class SingleLinkedListDemo {
             return null;
         }
         HeroNode temp = head.next;
-       for (int i = 0; i < length - index; i++) {
-           temp = temp.next;
-       }
+        for (int i = 0; i < length - index; i++) {
+            temp = temp.next;
+        }
         return temp;
     }
 
     /**
      * 获取到单链表的节点的个数(如果是带头结点的链表，需求不统计头节点)
+     *
      * @param head 链表的头节点
      * @return 返回的就是有效节点的个数
      */
@@ -179,9 +182,9 @@ public class SingleLinkedListDemo {
             HeroNode temp2 = head2.next;
             //指向辅助节点的下一个节点
             HeroNode next = null;
-            while (temp2 != null){
+            while (temp2 != null) {
                 //链表1遍历完了以后，直接把链表2中剩余的接在链表1后面
-                if (temp.next == null){
+                if (temp.next == null) {
                     temp.next = temp2;
                     break;
                 }
@@ -193,7 +196,7 @@ public class SingleLinkedListDemo {
                     // 将temp2连接到链表1上
                     temp.next = temp2;
                     //temp2后移
-                    temp2 =  next;
+                    temp2 = next;
                 }
                 //temp后移
                 temp = temp.next;
@@ -229,21 +232,6 @@ public class SingleLinkedListDemo {
         singleLinkedList.addByOrder(hero3);
 
         return singleLinkedList;
-    }
-
-    public static void demo() {
-        String str = "第一服务西安满堂悦MOMΛ服务中心,佛山三水高登汇服务中心,第一服务安徽地区公司本部,第一服务合肥天鹅湖万国府MOMΛ服务中心,第一服务九华山莲花小镇服务中心,五个三工作中心,第一服务南昌满庭春MOMΛ服务中心,第一服务南昌当代MOMΛ新城服务中心,第一服务九江满庭春MOMΛ服务中心,第一服务南昌国际满庭春MOMΛ服务中心,第一服务南昌东方海德堡服务中心,第一服务西安高陵上品湾MOMΛ服务中心,第一服务合肥当代MOMΛ服务中心,第一服务合肥当代MOMΛ未来城服务中心,深圳光明G33创意园顾问项目,佛山当代万国府ΜΟΜΛ服务中心,第一精酿,乐世界,西安宏府大厦·倍格商业,上海地区公司本部,第一服务南昌公安局新建分局服务中心,第一服务江西地区公司本部,上海馨佳园项目,第一服务蚌埠奥莱当代城MOMΛ服务中心,招商行销部,第一服务陕西地区公司本部,第一服务鹰潭供电局服务中心,第一服务浦发银行信息科技部服务中心,第一服务阜阳当代城MOMΛ服务中心,第一服务九江恒丰满城春服务中心,第一教育本部,绿色空间事业群（第一空间）本部,工程管理中心,绿色空间事业群（第一空间）本部,五个三工作中心,绿色空间事业群（第一空间）本部,运营管理中心,绿色空间事业群（第一空间）本部,人力资源中心,绿色空间事业群（第一空间）本部,投资发展中心,第一服务九江满庭春MOMΛ朝阳里服务中心,第一服务太原鸿赫·时代天际体验中心,第一服务亳州远大当代城MOMΛ服务中心,绿色空间事业群（第一空间）本部,第一服务西安当代惠尔满堂悦MOMΛ服务中心,第一服务阜阳临泉当代城MOMΛ服务中心,后勤部二,第一服务新余江南郡服务中心,信息运营中心2,第一服务南昌城投当代滨江上品MOMΛ服务中心,第一服务湖北地区公司工程管理部（仙桃片区）,综合维修专业,第一服务汉中结友水云居服务中心,绩效薪酬专业组,第一服务合肥斌锋当代府MOMΛ服务中心,第一服务阜阳琨宇悦湖城服务中心,第一服务临泉琨宇悦湖城体验中心";
-        String[] split = str.split(",");
-        Set<String> set = new HashSet<>();
-        Collections.addAll(set, split);
-        String str1 = "西安宏府大厦·倍格商业,综合维修专业,绩效薪酬专业组,第一精酿,第一服务鹰潭供电局服务中心,第一服务陕西地区公司本部,第一服务阜阳琨宇悦湖城服务中心,第一服务阜阳当代城MOMΛ服务中心,第一服务阜阳临泉当代城MOMΛ服务中心,第一服务西安高陵上品湾MOMΛ服务中心,第一服务西安满堂悦MOMΛ服务中心,第一服务西安当代惠尔满堂悦MOMΛ服务中心,第一服务蚌埠奥莱当代城MOMΛ服务中心,第一服务湖北地区公司工程管理部（仙桃片区）,第一服务浦发银行信息科技部服务中心,第一服务江西地区公司本部,第一服务汉中结友水云居服务中心,第一服务新余江南郡服务中心,第一服务安徽地区公司本部,第一服务太原鸿赫·时代天际体验中心,第一服务合肥斌锋当代府MOMΛ服务中心,第一服务合肥当代MOMΛ未来城服务中心,第一服务合肥当代MOMΛ服务中心,第一服务合肥天鹅湖万国府MOMΛ服务中心,第一服务南昌满庭春MOMΛ服务中心,第一服务南昌当代MOMΛ新城服务中心,第一服务南昌城投当代滨江上品MOMΛ服务中心,第一服务南昌国际满庭春MOMΛ服务中心,第一服务南昌公安局新建分局服务中心,第一服务南昌东方海德堡服务中心,第一服务亳州远大当代城MOMΛ服务中心,第一服务九江满庭春MOMΛ朝阳里服务中心,第一服务九江满庭春MOMΛ服务中心,第一服务九江恒丰满城春服务中心,第一服务九华山莲花小镇服务中心,第一服务临泉琨宇悦湖城体验中心,第一教育本部,深圳光明G33创意园顾问项目,招商行销部,后勤部二,信息运营中心2,佛山当代万国府ΜΟΜΛ服务中心,佛山三水高登汇服务中心,五个三工作中心,乐世界,上海馨佳园项目,上海地区公司本部";
-        String[] split1 = str1.split(",");
-        for (String s : split1) {
-            if (set.contains(s)) {
-                System.out.println(s);
-            }
-        }
-
     }
 }
 
@@ -366,7 +354,6 @@ class SingleLinkedList {
             temp = temp.next;
         }
     }
-
 }
 
 /**
