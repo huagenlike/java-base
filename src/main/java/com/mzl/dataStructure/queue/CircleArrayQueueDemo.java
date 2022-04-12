@@ -69,7 +69,7 @@ public class CircleArrayQueueDemo {
 
 /**
  * 这个是根据需要来用的
- * 循环队列中，由于入队时尾指du针向前追赶头指针；zhi出队时头指针向前追赶尾指针，造成dao队空和队满时头尾指针均相等。因此，无法通过条件front==rear来判别队列是"空"还是"满"。
+ * 循环队列中，由于入队时尾指针向前追赶头指针；出队时头指针向前追赶尾指针，造成队空和队满时头尾指针均相等。因此，无法通过条件front==rear来判别队列是"空"还是"满"。
  * 解决这个问题的方法至少有三种：
  * ①另设一布尔变量以区别队列的空和满；
  * ②少用一个元素的空间。约定入队前，测试尾指针在循环意义下加1后是否等于头指针，若相等则认为队满（注意：rear所指的单元始终为空）；
@@ -92,6 +92,7 @@ class CircleArrayQueue {
 
     // 判断队列是否满
     public boolean isFull() {
+        System.err.println((rear + 1) % maxSize);
         return (rear + 1) % maxSize == front;
     }
 
