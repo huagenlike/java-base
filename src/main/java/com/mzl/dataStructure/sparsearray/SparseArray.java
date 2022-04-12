@@ -9,7 +9,7 @@ import java.util.List;
  * 现在第二行第三个为篮子，第三行第四个为黑子。要进行数据存盘
  */
 public class SparseArray {
-    private static final String filePath = "D:\\work\\java\\study\\java-base\\src\\main\\java\\com\\mzl\\dataStructure\\chess.txt";
+    private static final String filePath = "F:\\may\\study\\java-base\\src\\main\\java\\com\\mzl\\dataStructure\\chess.txt";
 
     public static void main(String[] args) throws IOException {
         // 假设棋盘是大小11*11
@@ -23,14 +23,7 @@ public class SparseArray {
 
         // 将二维数组 转 稀疏数组的思
         // 1. 先遍历二维数组 得到非0数据的个数
-        int sum = 0;
-        for (int[] ints : chessArr1) {
-            for (int i = 0; i < 11; i++) {
-                if (ints[i] != 0) {
-                    sum++;
-                }
-            }
-        }
+        int sum = getCountByNonZeroNumber(chessArr1);
 
         // 2. 创建对应的稀疏数组
         int chessArr2[][] = new int[sum + 1][3];
@@ -69,6 +62,21 @@ public class SparseArray {
 
         System.out.println("还原的二维数组~~~~");
         arrPrint(chessArr3);
+    }
+
+    /**
+     * 获取非0数字的个数
+     */
+    public static int getCountByNonZeroNumber(int[][] arr) {
+        int sum = 0;
+        for (int[] ints : arr) {
+            for (int i = 0; i < 11; i++) {
+                if (ints[i] != 0) {
+                    sum++;
+                }
+            }
+        }
+        return sum;
     }
 
     /**
