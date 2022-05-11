@@ -4,6 +4,10 @@ import java.util.*;
 
 /**
  * 单链表模拟队列
+ * 链表是以节点的方式来存储，是链式结构
+ * 每个节点包含data域，next域：只想下一个节点
+ * 链表的各个节点不一定是连续存储
+ * 链表分带头结点的链表和没有头节点得链表
  */
 public class SingleLinkedListDemo {
 

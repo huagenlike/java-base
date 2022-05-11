@@ -9,7 +9,7 @@ import java.util.List;
  * 现在第二行第三个为篮子，第三行第四个为黑子。要进行数据存盘
  */
 public class SparseArray {
-    private static final String filePath = "F:\\may\\study\\java-base\\src\\main\\java\\com\\mzl\\dataStructure\\chess.txt";
+    private static final String filePath = "D:\\work\\java\\study\\java-base\\src\\main\\java\\com\\mzl\\dataStructure\\chess.txt";
 
     public static void main(String[] args) throws IOException {
         // 假设棋盘是大小11*11

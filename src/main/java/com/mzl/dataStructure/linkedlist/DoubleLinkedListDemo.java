@@ -32,7 +32,6 @@ public class DoubleLinkedListDemo {
         doubleLinkedList.del(3);
         System.out.println("删除后的链表情况~~");
         doubleLinkedList.list();
-
     }
 
 }
@@ -92,16 +91,16 @@ class DoubleLinkedList {
      * @param hero
      */
     public void addOrder(HeroNode2 hero) {
-        boolean flag = false;
-        boolean flag1 = false;
+        boolean isExistFlag = false;
+        boolean isLastFlag = false;
         HeroNode2 temp = head;
 
         while (true) {
             if (temp.next == null) { // 判断插入的元素是否最后一个
-                flag1 = true;
+                isLastFlag = true;
                 break;
             } else if (temp.no == hero.no) { // 判断英雄编号是否已存在
-                flag = true;
+                isExistFlag = true;
                 break;
             } else if (temp.next.no > hero.no) {
                 break;
@@ -109,9 +108,9 @@ class DoubleLinkedList {
             temp = temp.next;
         }
 
-        if (flag) {
+        if (isExistFlag) {
             System.out.printf("编号 %d 的节点已存在，不能插入\n", hero.no);
-        } else if (flag1) {
+        } else if (isLastFlag) {
             // 在temp后面插入
             hero.next = temp.next;
             temp.next = hero;

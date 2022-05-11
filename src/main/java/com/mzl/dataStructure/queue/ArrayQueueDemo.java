@@ -8,7 +8,6 @@ import java.util.Scanner;
 public class ArrayQueueDemo {
 
     public static void main(String[] args) {
-        //测试一把
         //创建一个队列
         ArrayQueue queue = new ArrayQueue(3);
         char key = ' '; //接收用户输入

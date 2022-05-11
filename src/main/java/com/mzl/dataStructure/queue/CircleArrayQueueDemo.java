@@ -11,8 +11,6 @@ import java.util.Scanner;
 public class CircleArrayQueueDemo {
 
     public static void main(String[] args) {
-
-        //测试一把
         System.out.println("测试数组模拟环形队列的案例~~~");
 
         // 创建一个环形队列
