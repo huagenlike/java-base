@@ -2,7 +2,7 @@ spring:
   datasource:
     username: root
     password: huagen1988
-    url: jdbc:mysql://120.53.249.150:3306/test?useUnicode=true&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://120.53.249.150:3306/xiaohaizi?useUnicode=true&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
     host: 120.53.249.150
@@ -21,3 +21,10 @@ spring:
     port: 6379
     #??????????
     timeout: 30000
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*.xml
+  global-config:
+    db-config:
+      id-type: auto #主键自增
+      logic-delete-value: 1
+      logic-not-delete-value: 0

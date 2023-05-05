@@ -1,5 +1,8 @@
 package com.mzl.concurrentProgramming.chap6;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicStampedReference;
 
@@ -18,7 +21,22 @@ public class CASABA {
 
     public static void main(String[] args) {
         CASABA a = new CASABA();
-        a.test();
+//        a.test();
+        a.test11();
+    }
+    public void test10() {
+        Double num = 69.26;
+        NumberFormat nf = NumberFormat.getNumberInstance();
+        nf.setMaximumFractionDigits(4);
+        nf.setRoundingMode(RoundingMode.UP);
+        String str = nf.format(num);
+        System.out.println(str);
+    }
+    public void test11() {
+        double d = 1;
+        // #.00 表示两位小数
+        DecimalFormat df = new DecimalFormat("#0.000"); // 保留两位小数，四舍五入
+        System.out.println("方法二：" + df.format(d)); //0.35
     }
 
     public void test() {
